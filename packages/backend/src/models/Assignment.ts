@@ -33,10 +33,11 @@ export interface IAssignment extends Document {
   createdAt: Date;
 }
 
-const QuestionSchema = new Schema<IQuestion>({
+const QuestionSchema = new Schema({
   text: { type: String, required: true },
   difficulty: { type: String, enum: ['Easy', 'Moderate', 'Challenging'], required: true },
-  marks: { type: Number, required: true }
+  marks: { type: Number, required: true },
+  options: [{ type: String }] // 💡 Add this array of strings for multiple choice choices
 });
 
 const AnswerItemSchema = new Schema<IAnswerItem>({

@@ -1,5 +1,5 @@
-import { GoogleGenAI, Type, Schema } from '@google/genai';
-import dotenv from 'dotenv';
+import { GoogleGenAI, Type, Schema } from "@google/genai";
+import dotenv from "dotenv";
 
 dotenv.config();
 
@@ -12,51 +12,78 @@ const assessmentResponseSchema: Schema = {
   properties: {
     aiIntroGreeting: {
       type: Type.STRING,
-      description: "A friendly, polite conversational greeting introducing the question paper. e.g., 'Certainly! Here is your customized Question Paper...'"
+      description:
+        "A friendly, polite conversational greeting introducing the question paper. e.g., 'Certainly! Here is your customized Question Paper...'",
     },
     sections: {
       type: Type.ARRAY,
-      description: "An array containing separate exam sections grouped by question format configurations.",
+      description:
+        "An array containing separate exam sections grouped by question format configurations.",
       items: {
         type: Type.OBJECT,
         properties: {
-          sectionLetter: { type: Type.STRING, description: "e.g., 'A', 'B', 'C'" },
-          sectionType: { type: Type.STRING, description: "e.g., 'Multiple Choice Questions', 'Short Answer Questions'" },
-          instruction: { type: Type.STRING, description: "Instructions for this section, e.g., 'Attempt all questions. Each question carries 2 marks.'" },
+          sectionLetter: {
+            type: Type.STRING,
+            description: "e.g., 'A', 'B', 'C'",
+          },
+          sectionType: {
+            type: Type.STRING,
+            description:
+              "e.g., 'Multiple Choice Questions', 'Short Answer Questions'",
+          },
+          instruction: {
+            type: Type.STRING,
+            description:
+              "Instructions for this section, e.g., 'Attempt all questions. Each question carries 2 marks.'",
+          },
+          // Look for the questions item structure inside assessmentResponseSchema and modify it:
           questions: {
             type: Type.ARRAY,
             items: {
               type: Type.OBJECT,
               properties: {
-                text: { type: Type.STRING, description: "The actual core text statement or question question." },
-                difficulty: { 
-                  type: Type.STRING, 
-                  enum: ["Easy", "Moderate", "Challenging"],
-                  description: "Balanced distribution classification."
+                text: {
+                  type: Type.STRING,
+                  description: "The core question statement.",
                 },
-                marks: { type: Type.INTEGER, description: "Allocated scoring mark matching config specifications." }
+                difficulty: {
+                  type: Type.STRING,
+                  enum: ["Easy", "Moderate", "Challenging"],
+                },
+                marks: { type: Type.INTEGER },
+                options: {
+                  type: Type.ARRAY,
+                  description:
+                    "CRITICAL: If the section type is 'Multiple Choice Questions', you MUST provide exactly 4 distinct choices here. For other question formats, leave this array completely empty.",
+                  items: { type: Type.STRING },
+                },
               },
-              required: ["text", "difficulty", "marks"]
-            }
-          }
+              required: ["text", "difficulty", "marks"], // Leave options optional so it can be empty for subjective questions
+            },
+          },
         },
-        required: ["sectionLetter", "sectionType", "instruction", "questions"]
-      }
+        required: ["sectionLetter", "sectionType", "instruction", "questions"],
+      },
     },
     answerKey: {
       type: Type.ARRAY,
-      description: "A comprehensive answer grid mapping complete solutions corresponding to every section question sequentially.",
+      description:
+        "A comprehensive answer grid mapping complete solutions corresponding to every section question sequentially.",
       items: {
         type: Type.OBJECT,
         properties: {
           questionNumber: { type: Type.INTEGER },
-          answerText: { type: Type.STRING, description: "Detailed structural step-by-step resolution or marking criteria scheme." }
+          answerText: {
+            type: Type.STRING,
+            description:
+              "Detailed structural step-by-step resolution or marking criteria scheme.",
+          },
         },
-        required: ["questionNumber", "answerText"]
-      }
-    }
+        required: ["questionNumber", "answerText"],
+      },
+    },
   },
-  required: ["aiIntroGreeting", "sections", "answerKey"]
+  required: ["aiIntroGreeting", "sections", "answerKey"],
 };
 
 interface IJobInput {
@@ -69,8 +96,11 @@ interface IJobInput {
 export const generatePaperWithGemini = async (data: IJobInput) => {
   // Format the input structural configurations clearly for the prompt
   const configurationSummary = data.questionConfigs
-    .map((c, idx) => `Section ${String.fromCharCode(65 + idx)}: Create ${c.count} ${c.type} allocating ${c.marksPerQuestion} mark(s) each.`)
-    .join('\n');
+    .map(
+      (c, idx) =>
+        `Section ${String.fromCharCode(65 + idx)}: Create ${c.count} ${c.type} allocating ${c.marksPerQuestion} mark(s) each.`,
+    )
+    .join("\n");
 
   const systemInstruction = `
     You are an expert, elite academic test designer and exam creator. 
@@ -94,18 +124,20 @@ export const generatePaperWithGemini = async (data: IJobInput) => {
 
   // Request structural generation from Gemini Flash (Optimized for JSON structuring tasks)
   const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash',
+    model: "gemini-2.5-flash",
     contents: userPrompt,
     config: {
       systemInstruction: systemInstruction,
-      responseMimeType: 'application/json',
+      responseMimeType: "application/json",
       responseSchema: assessmentResponseSchema,
       temperature: 0.2, // Low variance to keep accuracy to configuration specs tight
     },
   });
 
   if (!response.text) {
-    throw new Error("Gemini engine failed to generate an output block structure.");
+    throw new Error(
+      "Gemini engine failed to generate an output block structure.",
+    );
   }
 
   // Parse the guaranteed JSON text structural output
