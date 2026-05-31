@@ -8,6 +8,7 @@ import StepOneForm from '@/components/forms/StepOneForm';
 import StepTwoForm from '@/components/forms/StepTwoForm';
 import StepThreeForm from '@/components/forms/StepThreeForm';
 import StepFourPreview from '@/components/preview/StepFourPreview';
+
 export default function CreateAssessmentPage() {
   const currentStep = useAssignmentStore((state) => state.currentStep);
 
@@ -31,11 +32,12 @@ export default function CreateAssessmentPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
+    /* 💡 Added print:bg-white print:py-0 print:px-0 to strip out wrapper styles during printing */
+    <div className="min-h-screen bg-slate-50/50 py-12 px-4 sm:px-6 lg:px-8 print:bg-white print:py-0 print:px-0">
+      <div className="max-w-4xl mx-auto print:max-w-full">
         
-        {/* Header Layout branding */}
-        <div className="mb-10 text-center">
+        {/* Header Layout branding - 💡 HIDDEN ON PRINT */}
+        <div className="mb-10 text-center print:hidden">
           <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
             VedaAI Assessment Engine
           </h1>
@@ -44,8 +46,8 @@ export default function CreateAssessmentPage() {
           </p>
         </div>
 
-        {/* 🗺️ Horizontal Interactive Progress Stepper */}
-        <div className="mb-10 bg-white border border-slate-200/80 rounded-xl p-5 shadow-sm">
+        {/* 🗺️ Horizontal Interactive Progress Stepper - 💡 HIDDEN ON PRINT */}
+        <div className="mb-10 bg-white border border-slate-200/80 rounded-xl p-5 shadow-sm print:hidden">
           <div className="flex items-center justify-between relative">
             {stepsConfig.map((item, index) => {
               const IconComponent = item.icon;
@@ -94,7 +96,7 @@ export default function CreateAssessmentPage() {
         </div>
 
         {/* 🧱 Active Form Sub-View Presentation Window */}
-        <div className="transition-all duration-300 transform">
+        <div className="transition-all duration-300 transform print:m-0 print:p-0">
           {renderActiveStepComponent()}
         </div>
 
