@@ -1,9 +1,11 @@
+// ../models/Assignment.ts
 import { Schema, model, Document } from 'mongoose';
 
 export interface IQuestion {
   text: string;
   difficulty: 'Easy' | 'Moderate' | 'Challenging';
   marks: number;
+  options?: string[]; // 💡 Array of strings for Multiple Choice option strings
 }
 
 export interface IAnswerItem {
@@ -20,6 +22,7 @@ export interface IAssignment extends Document {
   totalMarks: number;
   additionalInstructions?: string;
   fileUrl?: string; 
+  referenceFileMimeType?: string; // 💡 Tracks uploaded reference mimeType context (e.g., application/pdf)
   status: 'pending' | 'processing' | 'completed' | 'failed';
   jobId?: string;
   aiIntroGreeting?: string; 
@@ -31,13 +34,14 @@ export interface IAssignment extends Document {
   }[];
   answerKey: IAnswerItem[];
   createdAt: Date;
+  updatedAt: Date;
 }
 
 const QuestionSchema = new Schema({
   text: { type: String, required: true },
   difficulty: { type: String, enum: ['Easy', 'Moderate', 'Challenging'], required: true },
   marks: { type: Number, required: true },
-  options: [{ type: String }] // 💡 Add this array of strings for multiple choice choices
+  options: [{ type: String }] // 💡 Populated dynamically when sectionType is MCQs
 });
 
 const AnswerItemSchema = new Schema<IAnswerItem>({
@@ -53,7 +57,8 @@ const AssignmentSchema = new Schema<IAssignment>({
   totalQuestions: { type: Number, required: true },
   totalMarks: { type: Number, required: true },
   additionalInstructions: { type: String },
-  fileUrl: { type: String },
+  fileUrl: { type: String }, // Can store your disk path/storage indicator reference string
+  referenceFileMimeType: { type: String },
   status: { 
     type: String, 
     enum: ['pending', 'processing', 'completed', 'failed'], 
