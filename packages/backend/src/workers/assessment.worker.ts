@@ -11,17 +11,28 @@ export const initAssessmentWorker = () => {
       console.log(`👷 Worker picked up job ${job.id}: Connecting to Gemini Engine...`);
       
       try {
-        const { assignmentId, subject, className, questionConfigs, additionalInstructions } = job.data;
+        // 💡 FIXED: Extracted fileBuffer and fileMimeType right out of the incoming BullMQ Redis payload
+        const { 
+          assignmentId, 
+          subject, 
+          className, 
+          questionConfigs, 
+          additionalInstructions,
+          fileBuffer,
+          fileMimeType 
+        } = job.data;
 
         // 1. Mark tracker progress status to 'processing'
         await Assignment.findByIdAndUpdate(assignmentId, { status: 'processing' });
 
-        // 2. Pass parameters straight into the Gemini execution handler
+        // 2. Pass parameters—including the base64 file data—straight into the Gemini execution handler
         const aiGeneratedPaper = await generatePaperWithGemini({
           subject,
           className,
           questionConfigs,
-          additionalInstructions
+          additionalInstructions,
+          fileBuffer,   // 💡 FIXED: Passed along to ground the AI
+          fileMimeType  // 💡 FIXED: Passed along to identify the file format
         });
 
         // 3. Persist the verified structural JSON right back into MongoDB
@@ -42,7 +53,9 @@ export const initAssessmentWorker = () => {
         throw error; // Re-throw so BullMQ can handle exponential backoff retries
       }
     },
-    { connection: connection as any }
+    { connection: connection as any,
+      concurrency: 1 // 🚀 Forces workers to execute exactly 1 paper at a time, preventing RPM spikes!
+     }
   );
 
   console.log('👷 Background Assessment Worker thread listening for incoming tasks...');

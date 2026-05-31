@@ -29,14 +29,13 @@ const assessmentResponseSchema: Schema = {
           sectionType: {
             type: Type.STRING,
             description:
-              "e.g., 'Multiple Choice Questions', 'Short Answer Questions'",
+              "e.g., 'Multiple Choice Questions', 'Short Questions'",
           },
           instruction: {
             type: Type.STRING,
             description:
               "Instructions for this section, e.g., 'Attempt all questions. Each question carries 2 marks.'",
           },
-          // Look for the questions item structure inside assessmentResponseSchema and modify it:
           questions: {
             type: Type.ARRAY,
             items: {
@@ -58,7 +57,7 @@ const assessmentResponseSchema: Schema = {
                   items: { type: Type.STRING },
                 },
               },
-              required: ["text", "difficulty", "marks"], // Leave options optional so it can be empty for subjective questions
+              required: ["text", "difficulty", "marks"],
             },
           },
         },
@@ -91,25 +90,40 @@ interface IJobInput {
   className: string;
   additionalInstructions?: string;
   questionConfigs: { type: string; count: number; marksPerQuestion: number }[];
+  fileBuffer?: string;      // 💡 Updated to string: Accepts the Base64 data securely passed through BullMQ/Redis
+  fileMimeType?: string;    // 💡 e.g., 'application/pdf'
 }
 
 export const generatePaperWithGemini = async (data: IJobInput) => {
-  // Format the input structural configurations clearly for the prompt
   const configurationSummary = data.questionConfigs
-    .map(
-      (c, idx) =>
-        `Section ${String.fromCharCode(65 + idx)}: Create ${c.count} ${c.type} allocating ${c.marksPerQuestion} mark(s) each.`,
-    )
-    .join("\n");
+    .map((c, idx) => `Section ${String.fromCharCode(65 + idx)}: Create ${c.count} ${c.type} allocating ${c.marksPerQuestion} mark(s) each.`)
+    .join('\n');
+
+  // Explicit contents array structure to pass to Gemini
+  const contentsArray: any[] = [];
+
+  // 💡 CRITICAL FIX: If base64 file data exists, inject it directly as an inlineData object block
+  if (data.fileBuffer && data.fileMimeType) {
+    console.log("📎 Found Base64 context grounding material. Injecting directly into Gemini context stream...");
+    contentsArray.push({
+      inlineData: {
+        data: data.fileBuffer,
+        mimeType: data.fileMimeType
+      }
+    });
+  }
 
   const systemInstruction = `
-    You are an expert, elite academic test designer and exam creator. 
-    Your job is to generate highly comprehensive, professional, and curriculum-accurate exam assessment papers based on user requirements.
+    You are an expert academic test designer. Your job is to generate comprehensive exam assessment papers based strictly on provided curriculum constraints.
     
-    CRITICAL RULES:
-    1. You must distribute question difficulties naturally across [Easy, Moderate, Challenging].
-    2. Maintain strict professional educational tone inside the core exam sheets.
-    3. You MUST adhere precisely to the exact question type counts and marks provided in the structural parameters.
+    CRITICAL GROUNDING RULE:
+    If an inline document (PDF/Text context/Notes) is present in the parameters contents block, you MUST pull all historical occurrences, specific historical figures, context definitions, vocabulary phrases, and conceptual details exclusively from that document. 
+    
+    For instance, if the file is a History textbook belonging to a regional board like the Maharashtra State Board, restrict your questioning scope entirely to the concrete chapters, forts, leaders (such as Shivaji Maharaj, Shahaji Raje, Jijabai), and milestones listed in that precise book. Do not invent external, generalized world history concepts outside the boundary framework of the provided document.
+    
+    CRITICAL FORMAT RULES:
+    1. Distribute question difficulties naturally across [Easy, Moderate, Challenging].
+    2. You MUST adhere precisely to the exact question type counts and marks provided.
   `;
 
   const userPrompt = `
@@ -119,27 +133,28 @@ export const generatePaperWithGemini = async (data: IJobInput) => {
     - Blueprint Configuration Specifications:
     ${configurationSummary}
     
-    - Additional Topic Focus Instructions: ${data.additionalInstructions || "None provided."}
+    - Additional Instructions: ${data.additionalInstructions || "None provided."}
+    
+    Please analyze the attached material context carefully to construct matching educational evaluations.
   `;
 
-  // Request structural generation from Gemini Flash (Optimized for JSON structuring tasks)
+  // 💡 Wrap prompt string cleanly into a text part structure array matching modern SDK specifications
+  contentsArray.push({ text: userPrompt });
+
   const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
-    contents: userPrompt,
+    model: 'gemini-2.5-flash',
+    contents: contentsArray,
     config: {
       systemInstruction: systemInstruction,
-      responseMimeType: "application/json",
+      responseMimeType: 'application/json',
       responseSchema: assessmentResponseSchema,
-      temperature: 0.2, // Low variance to keep accuracy to configuration specs tight
+      temperature: 0.1, // Locked lower to maximize source integrity adherence and limit hallucinations
     },
   });
 
   if (!response.text) {
-    throw new Error(
-      "Gemini engine failed to generate an output block structure.",
-    );
+    throw new Error("Gemini engine failed to generate an output block structure.");
   }
 
-  // Parse the guaranteed JSON text structural output
   return JSON.parse(response.text);
 };
