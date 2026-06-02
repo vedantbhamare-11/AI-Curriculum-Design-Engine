@@ -1,6 +1,8 @@
+"use JSX";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import Sidebar from "@/components/navigation/Sidebar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,8 +26,24 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col bg-slate-50 text-slate-900 selection:bg-indigo-100">
-        {children}
+      <body className="h-full bg-slate-50 text-slate-900 selection:bg-indigo-100 overflow-hidden">
+        
+        {/* 🛠️ Split View App Container Workspace */}
+        <div className="flex h-full w-full overflow-hidden">
+          
+          {/* Persistent Left Sidebar - Automatically hidden when printing */}
+          <Sidebar 
+            schoolName="Delhi Public School" 
+            location="Bokaro Steel City" 
+          />
+
+          {/* Dynamic Content Window Panel with independent scroll track */}
+          <main className="flex-1 h-full overflow-y-auto min-w-0 print:overflow-visible print:h-auto">
+            {children}
+          </main>
+          
+        </div>
+
       </body>
     </html>
   );

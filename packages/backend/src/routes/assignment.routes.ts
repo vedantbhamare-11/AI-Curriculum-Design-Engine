@@ -67,7 +67,21 @@ router.post('/', upload.single('referenceFile'), async (req, res) => {
     res.status(500).json({ error: "Failed to initialize creation workflow background layers." });
   }
 });
+router.get('/', async (req, res) => {
+  try {
+    console.log("🔍 Library index request received. Fetching records from MongoDB...");
+    
+    const historyList = await Assignment.find()
+      .sort({ createdAt: -1 })
+      .select('-__v'); // Safely strips out Mongoose version tracks
 
+    console.log(`✅ Successfully extracted ${historyList.length} total assignment metadata entries.`);
+    res.json(historyList);
+  } catch (error: any) {
+    console.error('❌ MongoDB database read operation crashed:', error);
+    res.status(500).json({ error: 'Failed to retrieve stored assessments repository data layers.' });
+  }
+});
 // Simple validation route to pull generated papers
 router.get('/:id', async (req, res) => {
   try {
