@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 import { connectDB } from './config/db.js';
 import assignmentRoutes from './routes/assignment.routes.js';
 import { initAssessmentWorker } from './workers/assessment.worker.js'; // 💡 Updated import
-
+import patternRoutes from './routes/pattern.routes.js';
 dotenv.config();
 
 const app = express();
@@ -30,3 +30,9 @@ app.get('/health', (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 Production engine humming along at: http://localhost:${PORT}`);
 });
+
+// ... down where your active server endpoints are mounted into your application container app:
+app.use('/api/assignments', assignmentRoutes);
+
+// 💡 NEW REUSABLE BLUEPRINT PATTERNS SUITE INJECTOR MOUNT POINT
+app.use('/api/patterns', patternRoutes);
