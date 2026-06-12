@@ -14,7 +14,9 @@ import {
   Eye, 
   Loader2,
   Inbox,
-  Trash2
+  Trash2,
+  AlertTriangle,
+  X
 } from 'lucide-react';
 
 interface AssignmentRecord {
@@ -37,6 +39,9 @@ export default function MyLibraryPage() {
   // Track which unique assignment IDs are actively processing a delete request
   const [deletingIds, setDeletingIds] = useState<Record<string, boolean>>({});
   
+  // 💡 Modal UI Trigger State - Stores the ID of the assignment targeted for deletion
+  const [activeDeleteId, setActiveDeleteId] = useState<string | null>(null);
+
   const router = useRouter();
 
   // 1. Fetch historical data rows straight from your MongoDB express feed route
@@ -108,21 +113,18 @@ export default function MyLibraryPage() {
     router.push('/create');
   };
 
-  // 3. Delete request orchestration pipeline handler
-  const handleDeletePaper = async (e: React.MouseEvent, id: string) => {
-    e.stopPropagation(); // Prevents accidental routing triggers on parent elements
-
-    const confirmDeletion = window.confirm(
-      "Are you sure you want to permanently delete this assessment? This action will remove it completely from your dashboard and database."
-    );
+  // 3. Confirmed delete execution pipeline execution loop
+  const executeDeleteSequence = async () => {
+    if (!activeDeleteId) return;
+    const targetId = activeDeleteId;
     
-    if (!confirmDeletion) return;
+    // Close modal modal overlay layer instantly right before firing fetch
+    setActiveDeleteId(null);
 
     try {
-      // Set local loading flag for this specific card instance
-      setDeletingIds(prev => ({ ...prev, [id]: true }));
+      setDeletingIds(prev => ({ ...prev, [targetId]: true }));
 
-      const response = await fetch(`http://localhost:5001/api/assignments/${id}`, {
+      const response = await fetch(`http://localhost:5001/api/assignments/${targetId}`, {
         method: 'DELETE',
       });
 
@@ -130,18 +132,17 @@ export default function MyLibraryPage() {
         throw new Error('Backend failed to complete the database deletion request.');
       }
 
-      // Smoothly slide out the item from current state matrix upon successful API validation
-      setAssessments(prev => prev.filter(item => item._id !== id));
+      setAssessments(prev => prev.filter(item => item._id !== targetId));
     } catch (err) {
       console.error("🛑 Failed to process deletion loop sequence:", err);
       alert("Error: Unable to drop this document from the database right now.");
     } finally {
-      setDeletingIds(prev => ({ ...prev, [id]: false }));
+      setDeletingIds(prev => ({ ...prev, [targetId]: false }));
     }
   };
 
   return (
-    <div className="w-full min-h-screen bg-slate-50/70 py-8 px-6 sm:px-10 lg:px-12">
+    <div className="w-full min-h-screen bg-slate-50/70 py-8 px-6 sm:px-10 lg:px-12 relative">
       <div className="max-w-5xl mx-auto space-y-6">
         
         {/* Header Title Block Row */}
@@ -207,8 +208,8 @@ export default function MyLibraryPage() {
               return (
                 <div 
                   key={paper._id}
-                  className={`bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-slate-300/90 transition-all flex flex-col justify-between space-y-4 group transition-opacity duration-300 ${
-                    isCardDeleting ? 'opacity-40 pointer-events-none' : 'opacity-100'
+                  className={`bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-slate-300/90 flex flex-col justify-between space-y-4 group transition-all duration-300 ${
+                    isCardDeleting ? 'opacity-40 pointer-events-none scale-[0.99]' : 'opacity-100'
                   }`}
                 >
                   <div className="space-y-2">
@@ -263,7 +264,10 @@ export default function MyLibraryPage() {
                     </button>
 
                     <button
-                      onClick={(e) => handleDeletePaper(e, paper._id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveDeleteId(paper._id); // 💡 Triggers custom Dialog open state
+                      }}
                       disabled={isCardDeleting}
                       title="Delete assignment permanently"
                       className="h-10 w-10 border border-slate-200 hover:bg-red-50 hover:border-red-200 text-slate-400 hover:text-red-600 rounded-xl flex items-center justify-center transition-all active:scale-95 disabled:opacity-50 shrink-0"
@@ -280,8 +284,63 @@ export default function MyLibraryPage() {
             })}
           </div>
         )}
-
       </div>
+
+      {/* 💡 ELITE WHITE-LABEL MODAL DIALOG OVERLAY COMPONENT */}
+      {activeDeleteId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in print:hidden">
+          
+          {/* Backdrop Blur Tint Layer */}
+          <div 
+            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
+            onClick={() => setActiveDeleteId(null)} 
+          />
+          
+          {/* Main Modal Structure Box */}
+          <div className="bg-white border border-slate-200 w-full max-w-md rounded-2xl shadow-2xl p-6 relative z-10 transform transition-all scale-100 duration-200 animate-slide-up">
+            
+            {/* Upper Title Close Cross Controller */}
+            <button 
+              onClick={() => setActiveDeleteId(null)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors p-1 rounded-lg hover:bg-slate-50"
+            >
+              <X className="h-4 w-4 stroke-[2.5]" />
+            </button>
+
+            {/* Warning Message Icon Content Body Container */}
+            <div className="flex gap-4 items-start pt-1">
+              <div className="h-10 w-10 bg-red-50 rounded-xl flex items-center justify-center text-red-600 shrink-0 shadow-inner">
+                <AlertTriangle className="h-5 w-5" />
+              </div>
+              <div className="space-y-1 flex-1">
+                <h3 className="text-base font-black text-slate-900 tracking-tight">
+                  Confirm Permanent Deletion
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-500 font-medium leading-relaxed">
+                  Are you absolutely sure you want to discard this item? This action will instantly clear the quiz metrics and destroy the document reference block inside MongoDB permanently.
+                </p>
+              </div>
+            </div>
+
+            {/* Action Dialog Footer Option Row */}
+            <div className="mt-6 flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
+              <button
+                onClick={() => setActiveDeleteId(null)}
+                className="h-10 px-4 border border-slate-200 hover:bg-slate-50 font-bold text-xs text-slate-600 rounded-xl transition-all active:scale-95"
+              >
+                Cancel, Keep File
+              </button>
+              <button
+                onClick={executeDeleteSequence}
+                className="h-10 px-4 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl shadow-lg shadow-red-100 transition-all active:scale-95"
+              >
+                Yes, Delete Permanently
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
     </div>
   );
 }
