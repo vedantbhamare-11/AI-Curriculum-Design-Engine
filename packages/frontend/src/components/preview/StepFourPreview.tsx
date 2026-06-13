@@ -98,32 +98,39 @@ export default function StepFourPreview() {
 
                 {/* Questions Block Wrapper */}
                 <div className="space-y-6 pl-2">
-                  {section.questions.map((q: any, qIdx: number) => (
-                    <div key={qIdx} className="space-y-2 print:break-inside-avoid-page">
-                      <div className="flex justify-between items-start gap-4">
-                        <p className="text-base leading-relaxed text-slate-900 print:text-black flex-1">
-                          <span className="font-bold mr-2">{qIdx + 1}.</span> {q.text}
-                        </p>
-                        <span className="text-sm font-bold text-slate-700 whitespace-nowrap print:text-black">
-                          ({q.marks} Marks)
-                        </span>
-                      </div>
-
-                      {/* Render MCQ Choices options cleanly inline if present */}
-                      {q.options && q.options.length > 0 && (
-                        <div className="grid grid-cols-2 gap-x-8 gap-y-2 pl-6 pt-1">
-                          {q.options.map((option: string, oIdx: number) => (
-                            <div key={oIdx} className="flex items-center gap-3 text-sm text-slate-800 print:text-black">
-                              <span className="h-5 w-5 rounded-full border border-slate-900 font-sans flex items-center justify-center text-xs font-bold shrink-0">
-                                {String.fromCharCode(65 + oIdx)}
-                              </span>
-                              <span>{option}</span>
-                            </div>
-                          ))}
+                  {section.questions.map((q: any, qIdx: number) => {
+                    
+                    // 💡 FIXED MULTI-TIER FALLBACK STRATEGY:
+                    // Gracefully falls through all naming conventions to ensure visibility across legacy and new database formats
+                    const targetQuestionText = q.text || q.questionText || q.question_text || q.question || "Sample Evaluation Question Statement Block";
+                    
+                    return (
+                      <div key={qIdx} className="space-y-2 print:break-inside-avoid-page">
+                        <div className="flex justify-between items-start gap-4">
+                          <p className="text-base leading-relaxed text-slate-900 print:text-black flex-1">
+                            <span className="font-bold mr-2">{qIdx + 1}.</span> {targetQuestionText}
+                          </p>
+                          <span className="text-sm font-bold text-slate-700 whitespace-nowrap print:text-black">
+                            ({q.marks} Marks)
+                          </span>
                         </div>
-                      )}
-                    </div>
-                  ))}
+
+                        {/* Render MCQ Choices options cleanly inline if present */}
+                        {q.options && q.options.length > 0 && (
+                          <div className="grid grid-cols-2 gap-x-8 gap-y-2 pl-6 pt-1">
+                            {q.options.map((option: string, oIdx: number) => (
+                              <div key={oIdx} className="flex items-center gap-3 text-sm text-slate-800 print:text-black">
+                                <span className="h-5 w-5 rounded-full border border-slate-900 font-sans flex items-center justify-center text-xs font-bold shrink-0">
+                                  {String.fromCharCode(65 + oIdx)}
+                                </span>
+                                <span>{option}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             ))}
@@ -141,10 +148,10 @@ export default function StepFourPreview() {
               {paper.answerKey.map((ans: any, aIdx: number) => (
                 <div key={aIdx} className="p-4 bg-slate-50/50 border border-slate-100 rounded-xl print:bg-transparent print:border-none print:p-0 print:break-inside-avoid-page">
                   <div className="flex items-center gap-2 mb-1.5">
-                    <span className="font-black text-sm text-slate-900">Question {ans.questionNumber}:</span>
+                    <span className="font-black text-sm text-slate-900">Question {ans.questionNumber || (aIdx + 1)}:</span>
                   </div>
                   <p className="text-slate-800 print:text-black text-sm leading-relaxed pl-1">
-                    {ans.answerText}
+                    {ans.answerText || ans.answer || "No verified solution criteria written."}
                   </p>
                 </div>
               ))}
