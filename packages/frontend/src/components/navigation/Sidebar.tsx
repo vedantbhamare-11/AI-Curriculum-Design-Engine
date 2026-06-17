@@ -32,18 +32,12 @@ export default function Sidebar({
   // 💡 FIXED: Appended Reference Context Vault directly below Paper Patterns
   const navItems = [
     { label: "Home", href: "/dashboard", icon: LayoutDashboard },
-    { label: "My Groups", href: "/groups", icon: Users },
+
+    { label: "Paper Patterns", href: "/patterns", icon: Sliders },
     {
-      label: "Assignments",
-      href: "/assignments",
-      icon: FileText,
-      badgeCount: 10,
-    },
-    { label: "Paper Patterns", href: "/patterns", icon: Sliders }, 
-    { 
-      label: "Context Vault", 
-      href: "/vault", 
-      icon: FolderHeart 
+      label: "Context Vault",
+      href: "/vault",
+      icon: FolderHeart,
     }, // 📚 NEW: Dedicated long-term textbooks and reference manuals tab
     { label: "My Library", href: "/library", icon: Library },
   ];
@@ -91,12 +85,6 @@ export default function Sidebar({
                   />
                   <span>{item.label}</span>
                 </div>
-
-                {item.badgeCount && (
-                  <span className="h-5 px-1.5 min-w-5 bg-orange-500 text-white font-bold text-[11px] rounded-full flex items-center justify-center shadow-sm shadow-orange-100">
-                    {item.badgeCount}
-                  </span>
-                )}
               </Link>
             );
           })}
