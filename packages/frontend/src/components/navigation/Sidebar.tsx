@@ -4,41 +4,33 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSettingsStore } from "@/store/useSettingsStore";
 import {
   GraduationCap,
   Plus,
   LayoutDashboard,
-  Users,
-  FileText,
   Sliders,
-  FolderHeart, // 💡 NEW: Imported for your Reference Context Vault hub link
+  FolderHeart,
   Library,
   Settings,
 } from "lucide-react";
 
 interface SidebarProps {
-  schoolName?: string;
-  location?: string;
   avatarUrl?: string;
 }
 
 export default function Sidebar({
-  schoolName = "Delhi Public School",
-  location = "Bokaro Steel City",
   avatarUrl = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80",
 }: SidebarProps) {
   const pathname = usePathname();
+  
+  // 💡 HYDRATE STRUCTURAL PREFERENCES FROM CLIENT-SIDE ZUSTAND MEMORY STRIPS
+  const { teacherName, schoolName, departmentName } = useSettingsStore();
 
-  // 💡 FIXED: Appended Reference Context Vault directly below Paper Patterns
   const navItems = [
     { label: "Home", href: "/dashboard", icon: LayoutDashboard },
-
     { label: "Paper Patterns", href: "/patterns", icon: Sliders },
-    {
-      label: "Context Vault",
-      href: "/vault",
-      icon: FolderHeart,
-    }, // 📚 NEW: Dedicated long-term textbooks and reference manuals tab
+    { label: "Context Vault", href: "/vault", icon: FolderHeart }, 
     { label: "My Library", href: "/library", icon: Library },
   ];
 
@@ -108,19 +100,24 @@ export default function Sidebar({
         {/* Divider line */}
         <div className="h-px bg-slate-100 mx-2" />
 
-        {/* School Profile Context Block */}
+        {/* 🏫 TOPOLOGY PROFILE FOOTER CONTEXT BLOCK */}
         <div className="flex items-center gap-3 p-3 bg-slate-50 border border-slate-100 rounded-2xl">
           <img
             src={avatarUrl}
-            alt={schoolName}
-            className="h-10 w-10 rounded-xl object-cover border border-slate-200/60 shadow-inner"
+            alt={teacherName}
+            className="h-10 w-10 rounded-xl object-cover border border-slate-200/60 shadow-inner shrink-0"
           />
           <div className="flex-1 min-w-0">
+            {/* Lead Teacher Name Anchor */}
             <h4 className="text-xs font-black text-slate-900 truncate tracking-wide">
-              {schoolName}
+              {teacherName || "Lead Educator"}
             </h4>
-            <p className="text-[11px] font-bold text-slate-400 truncate tracking-wide mt-0.5">
-              {location}
+            {/* Hierarchical Campus Node Sub-labels */}
+            <p className="text-[10px] font-bold text-slate-500 truncate tracking-wide mt-0.5">
+              {schoolName || "Institutional Branch"}
+            </p>
+            <p className="text-[9px] font-semibold text-slate-400 truncate tracking-wider uppercase mt-0.5">
+              {departmentName || "General Faculty"}
             </p>
           </div>
         </div>
