@@ -23,19 +23,16 @@ interface VaultDocument {
 }
 
 export default function ContextVaultPage() {
-  // Master catalog indices states
   const [vaultDocs, setVaultDocs] = useState<VaultDocument[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSubject, setSelectedSubject] = useState('All');
   
-  // Drawer & PDF View states
   const [activePreviewDoc, setActivePreviewDoc] = useState<VaultDocument | null>(null);
   const [activePdfUrl, setActivePdfUrl] = useState<string | null>(null);
   const [pdfModalTitle, setPdfModalTitle] = useState<string>('');
   const [isLoadingPdf, setIsLoadingPdf] = useState(false);
 
-  // Upload Modal input states
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newDesc, setNewDesc] = useState('');
@@ -43,29 +40,18 @@ export default function ContextVaultPage() {
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Informational Feedback Modal Notification States
   const [feedbackState, setFeedbackState] = useState<{
     isOpen: boolean;
     type: 'success' | 'error';
     title: string;
     message: string;
-  }>({
-    isOpen: false,
-    type: 'success',
-    title: '',
-    message: ''
-  });
+  }>({ isOpen: false, type: 'success', title: '', message: '' });
 
-  // 💡 NEW STATE: Destructive Confirmation Modal Staging variables
   const [deleteConfirmation, setDeleteConfirmation] = useState<{
     isOpen: boolean;
     targetId: string;
     targetTitle: string;
-  }>({
-    isOpen: false,
-    targetId: '',
-    targetTitle: ''
-  });
+  }>({ isOpen: false, targetId: '', targetTitle: '' });
 
   async function loadVaultCatalog() {
     try {
@@ -144,24 +130,16 @@ export default function ContextVaultPage() {
     setPdfModalTitle('');
   };
 
-  // 💡 STAGE FOR DELETION OVERLAY TRIGGER: Saves metadata to queue state instead of throwing window prompt boxes
   const handleStageDeletion = (docId: string, title: string) => {
-    setDeleteConfirmation({
-      isOpen: true,
-      targetId: docId,
-      targetTitle: title
-    });
+    setDeleteConfirmation({ isOpen: true, targetId: docId, targetTitle: title });
   };
 
-  // EXECUTE PURGE PIPELINE: Confirmed callback triggered from custom confirmation panel view
   const handleExecutePurge = async () => {
     const { targetId, targetTitle } = deleteConfirmation;
     if (!targetId) return;
 
     try {
-      const res = await fetch(`http://localhost:5001/api/vault/${targetId}`, {
-        method: 'DELETE'
-      });
+      const res = await fetch(`http://localhost:5001/api/vault/${targetId}`, { method: 'DELETE' });
       const result = await res.json();
       
       if (!res.ok) throw new Error(result.error || 'Server rejected document archive deletion pass.');
@@ -170,9 +148,8 @@ export default function ContextVaultPage() {
         isOpen: true,
         type: 'success',
         title: 'Archive Purged Successfully',
-        message: `"${targetTitle}" has been permanently scrubbed out of your long-term storage configurations layout rules.`
+        message: `"${targetTitle}" has been permanently scrubbed out of your library catalog.`
       });
-
       loadVaultCatalog();
     } catch (err: any) {
       console.error(err);
@@ -180,7 +157,7 @@ export default function ContextVaultPage() {
         isOpen: true,
         type: 'error',
         title: 'Purge Order Refused',
-        message: err.message || 'The data tier encountered an indexing error processing document deletes.'
+        message: err.message || 'Error executing document deletion passes.'
       });
     }
   };
@@ -191,7 +168,7 @@ export default function ContextVaultPage() {
       setFeedbackState({
         isOpen: true,
         type: 'error',
-        title: 'Missing Required Parameters',
+        title: 'Missing Parameters',
         message: 'Ensure valid title definitions, scope descriptions, and resource text bindings are appended.'
       });
       return;
@@ -207,18 +184,14 @@ export default function ContextVaultPage() {
       }));
       formData.append('vaultFile', uploadFile); 
 
-      const res = await fetch('http://localhost:5001/api/vault', {
-        method: 'POST',
-        body: formData 
-      });
-
+      const res = await fetch('http://localhost:5001/api/vault', { method: 'POST', body: formData });
       if (!res.ok) throw new Error("Backend save failure.");
 
       setFeedbackState({
         isOpen: true,
         type: 'success',
         title: 'Reference Asset Archived',
-        message: `"${newTitle.trim()}" has been cataloged inside the Context Vault under subject cluster [${newSubject}].`
+        message: `"${newTitle.trim()}" has been cataloged inside the Context Vault.`
       });
 
       setIsUploadModalOpen(false);
@@ -232,7 +205,7 @@ export default function ContextVaultPage() {
         isOpen: true,
         type: 'error',
         title: 'Ingest Pipeline Breakdown',
-        message: err.message || 'Error transmitting multi-part structured content parameters to express routers.'
+        message: err.message || 'Error transmitting content parameters to backend configurations routers.'
       });
     } finally {
       setIsSubmitting(false);
@@ -246,16 +219,14 @@ export default function ContextVaultPage() {
   });
 
   return (
-    <div className="w-full min-h-screen bg-slate-50 py-8 px-6 sm:px-10 lg:px-12 relative animate-in fade-in duration-300">
+    <div className="w-full min-h-screen bg-slate-50 py-8 px-6 sm:px-10 lg:px-12 relative animate-in fade-in duration-300 text-slate-900">
       <div className="max-w-6xl mx-auto space-y-6">
         
-        {/* Vault Header Component */}
         <VaultHeader 
           onOpenUpload={() => setIsUploadModalOpen(true)} 
           documentCount={vaultDocs.length} 
         />
 
-        {/* Workspace Query Filter Component */}
         <VaultFilters 
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
@@ -263,15 +234,14 @@ export default function ContextVaultPage() {
           setSelectedSubject={setSelectedSubject}
         />
 
-        {/* Master Catalog Iteration Grid */}
         {isLoading ? (
-          <div className="bg-white border border-slate-200 p-16 text-center rounded-3xl shadow-sm flex flex-col items-center justify-center gap-2">
-            <Loader2 className="h-7 w-7 animate-spin text-indigo-600" />
-            <p className="text-sm font-bold text-slate-500">Querying long-term references collection index...</p>
+          <div className="bg-white border border-slate-200 p-16 text-center rounded-2xl shadow-sm flex flex-col items-center justify-center gap-2">
+            <Loader2 className="h-6 w-6 animate-spin text-slate-900" />
+            <p className="text-xs font-bold text-slate-400">Querying long-term references collection index...</p>
           </div>
         ) : filteredDocs.length === 0 ? (
-          <div className="bg-white border border-slate-200 p-16 rounded-3xl text-center border-dashed border-slate-300">
-            <p className="text-sm font-bold text-slate-500">No reference manuals or books cataloged here matching criteria.</p>
+          <div className="bg-white border border-slate-200 p-16 rounded-2xl text-center border-dashed">
+            <p className="text-xs font-bold text-slate-400">No reference manuals or books cataloged matching active workspace constraints.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -281,7 +251,7 @@ export default function ContextVaultPage() {
                 doc={doc}
                 onViewPdf={handleOpenPdfModal}
                 onReviseText={handleOpenDrawer}
-                onDelete={handleStageDeletion} // 🚀 Connected cleanly to modern interceptor channel
+                onDelete={handleStageDeletion}
               />
             ))}
           </div>
@@ -289,7 +259,6 @@ export default function ContextVaultPage() {
 
       </div>
 
-      {/* Resource Upload Modal Container */}
       <UploadModal 
         isOpen={isUploadModalOpen}
         onClose={() => setIsUploadModalOpen(false)}
@@ -305,46 +274,43 @@ export default function ContextVaultPage() {
         isSubmitting={isSubmitting}
       />
 
-      {/* Sliding Drawer: Text Context Revision Space */}
+      {/* Sliding Revision Drawer Area */}
       {activePreviewDoc && (
         <div className="fixed inset-0 z-50 flex justify-end bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="absolute inset-0" onClick={() => setActivePreviewDoc(null)} />
-          <div className="w-full max-w-xl bg-white h-screen shadow-2xl flex flex-col justify-between relative z-10 animate-in slide-in-from-right duration-300">
+          <div className="w-full max-w-xl bg-white h-screen shadow-2xl flex flex-col justify-between relative z-10 animate-in slide-in-from-right duration-300 border-l border-slate-200">
             
-            <div className="p-6 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+            <div className="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50 px-6">
               <div className="flex items-center gap-2.5">
-                <FileText className="h-5 w-5 text-indigo-600" />
+                <FileText className="h-4 w-4 text-slate-800" />
                 <div>
-                  <h3 className="text-sm font-black text-slate-900 truncate max-w-[320px]">Revision Panel</h3>
-                  <p className="text-[11px] text-slate-500 font-bold uppercase tracking-wider">{activePreviewDoc.subject} • {activePreviewDoc.fileSizeText}</p>
+                  <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">Revision Panel</h3>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">{activePreviewDoc.subject} • {activePreviewDoc.fileSizeText}</p>
                 </div>
               </div>
-              <button onClick={() => setActivePreviewDoc(null)} className="h-8 w-8 border border-slate-200 hover:bg-slate-50 rounded-xl flex items-center justify-center transition-colors">
-                <X className="h-4 w-4 stroke-[2.5]" />
+              <button onClick={() => setActivePreviewDoc(null)} className="h-8 w-8 border border-slate-200 hover:bg-slate-100 rounded-xl flex items-center justify-center transition-all cursor-pointer">
+                <X className="h-4 w-4 stroke-[2.5] text-slate-500" />
               </button>
             </div>
 
-            <div className="p-6 flex-1 overflow-y-auto space-y-5 leading-relaxed bg-white">
-              <div className="space-y-1.5">
-                <h2 className="text-base font-black text-slate-900">{activePreviewDoc.title}</h2>
-                <div className="h-0.5 w-12 bg-indigo-600 rounded" />
-              </div>
+            <div className="p-6 flex-1 overflow-y-auto space-y-4 leading-relaxed bg-white">
+              <h2 className="text-base font-black text-slate-900">{activePreviewDoc.title}</h2>
 
-              <div className="bg-slate-50 border border-slate-200 p-4 rounded-xl space-y-3">
-                <h4 className="text-xs font-black text-indigo-700 uppercase tracking-wider flex items-center gap-1">
-                  <Sparkles className="h-3.5 w-3.5" /> Core Description Summary
+              <div className="bg-slate-50 border border-slate-200 p-4 rounded-xl space-y-2">
+                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                  <Sparkles className="h-3 w-3 text-amber-500 fill-amber-500" /> Core Summary Target Scope
                 </h4>
-                <p className="text-xs text-slate-700 font-semibold leading-relaxed">
+                <p className="text-xs text-slate-600 font-semibold leading-relaxed">
                   {activePreviewDoc.description}
                 </p>
               </div>
 
-              <div className="space-y-2 pt-2">
-                <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-                  <BookOpen className="h-3.5 w-3.5 text-slate-500" /> Reference Material Inner Text Context
+              <div className="space-y-1.5">
+                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                  Reference Material Inner Text Context
                 </h4>
-                <div className="w-full h-80 p-4 bg-slate-900 text-slate-100 font-mono text-xs rounded-xl border border-slate-800 overflow-y-auto leading-relaxed shadow-inner">
-                  <p className="whitespace-pre-line text-slate-300">
+                <div className="w-full h-80 p-4 bg-slate-50 border border-slate-200 text-slate-800 font-mono text-xs rounded-xl overflow-y-auto leading-relaxed shadow-inner">
+                  <p className="whitespace-pre-line font-medium text-slate-600">
                     {activePreviewDoc.extractedText || "🔍 Loading text data metrics straight from database collection layers..."}
                   </p>
                 </div>
@@ -352,7 +318,7 @@ export default function ContextVaultPage() {
             </div>
 
             <div className="p-4 border-t border-slate-200 bg-slate-50 flex justify-end">
-              <button onClick={() => setActivePreviewDoc(null)} className="h-10 px-5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-sm">
+              <button onClick={() => setActivePreviewDoc(null)} className="h-10 px-5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs uppercase tracking-wider rounded-xl cursor-pointer shadow-sm">
                 Close Review Section
               </button>
             </div>
@@ -360,41 +326,39 @@ export default function ContextVaultPage() {
         </div>
       )}
 
-      {/* Standalone Fullscreen PDF Modal Viewport Panel */}
       {isLoadingPdf && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm">
-          <div className="bg-white p-6 rounded-2xl shadow-2xl flex items-center gap-3 font-bold text-sm text-slate-700 border border-slate-200 animate-in zoom-in-95 duration-200">
-            <Loader2 className="h-5 w-5 animate-spin text-indigo-600" /> Stream buffer unzipping deployment in progress...
+          <div className="bg-white p-5 rounded-xl shadow-2xl flex items-center gap-3 font-black text-xs text-slate-800 border border-slate-200">
+            <Loader2 className="h-4 w-4 animate-spin text-slate-900" /> Stream deployment buffer processing...
           </div>
         </div>
       )}
 
       {activePdfUrl && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 md:p-10 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 md:p-10 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="absolute inset-0" onClick={handleClosePdfModal} />
-          
-          <div className="w-full max-w-5xl bg-white h-[88vh] rounded-3xl shadow-2xl flex flex-col justify-between relative z-10 overflow-hidden border border-slate-200/80 animate-in zoom-in-95 duration-200">
+          <div className="w-full max-w-5xl bg-white h-[88vh] rounded-2xl shadow-2xl flex flex-col justify-between relative z-10 overflow-hidden border border-slate-200 animate-in zoom-in-95 duration-200">
             
             <div className="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50 px-5">
               <div className="flex items-center gap-2.5 min-w-0">
-                <FilePlay className="h-5 w-5 text-indigo-600 shrink-0" />
-                <h3 className="text-sm font-black text-slate-900 truncate pr-4">{pdfModalTitle}</h3>
+                <FilePlay className="h-4 w-4 text-slate-700 shrink-0" />
+                <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider truncate pr-4">{pdfModalTitle}</h3>
               </div>
-              <button onClick={handleClosePdfModal} className="h-8 w-8 border border-slate-200 hover:bg-slate-100 rounded-xl flex items-center justify-center transition-all shadow-sm shrink-0">
+              <button onClick={handleClosePdfModal} className="h-8 w-8 border border-slate-200 hover:bg-slate-100 rounded-xl flex items-center justify-center transition-all shadow-sm shrink-0 cursor-pointer">
                 <X className="h-4 w-4 stroke-[2.5] text-slate-500" />
               </button>
             </div>
 
-            <div className="flex-1 w-full bg-slate-100 p-3 sm:p-4 min-h-0">
+            <div className="flex-1 w-full bg-slate-100 p-4 min-h-0">
               <iframe 
                 src={`${activePdfUrl}#toolbar=1&navpanes=0`} 
-                className="w-full h-full rounded-2xl border border-slate-300 shadow-inner bg-white" 
+                className="w-full h-full rounded-xl border border-slate-200 shadow-inner bg-white" 
                 title="Context Vault Isolated PDF Frame Viewer"
               />
             </div>
 
             <div className="p-4 border-t border-slate-200 bg-slate-50 flex justify-end shrink-0">
-              <button onClick={handleClosePdfModal} className="h-10 px-5 bg-slate-900 hover:bg-slate-800 text-white font-black text-xs rounded-xl shadow-sm transition-all active:scale-95">
+              <button onClick={handleClosePdfModal} className="h-10 px-5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs uppercase tracking-wider rounded-xl cursor-pointer shadow-sm">
                 Exit Document Viewer
               </button>
             </div>
@@ -403,25 +367,8 @@ export default function ContextVaultPage() {
         </div>
       )}
 
-      {/* Interactive Informational Alerts Feedback Modal */}
-      <FeedbackModal 
-        isOpen={feedbackState.isOpen}
-        onClose={() => setFeedbackState(prev => ({ ...prev, isOpen: false }))}
-        type={feedbackState.type}
-        title={feedbackState.title}
-        message={feedbackState.message}
-      />
-
-      {/* 💡 THE BRAND-NEW DESTRUCTIVE PURGE CONFIRMATION MODAL OVERLAY */}
-      <ConfirmationModal 
-        isOpen={deleteConfirmation.isOpen}
-        onClose={() => setDeleteConfirmation(prev => ({ ...prev, isOpen: false }))}
-        onConfirm={handleExecutePurge}
-        title="Confirm Document Removal"
-        message={`Are you sure you want to permanently scrub "${deleteConfirmation.targetTitle}" out of your library catalog references archive? This action cannot be undone.`}
-        confirmText="Confirm Delete"
-      />
-
+      <FeedbackModal isOpen={feedbackState.isOpen} onClose={() => setFeedbackState(prev => ({ ...prev, isOpen: false }))} type={feedbackState.type} title={feedbackState.title} message={feedbackState.message} />
+      <ConfirmationModal isOpen={deleteConfirmation.isOpen} onClose={() => setDeleteConfirmation(prev => ({ ...prev, isOpen: false }))} onConfirm={handleExecutePurge} title="Confirm Document Removal" message={`Are you sure you want to permanently scrub "${deleteConfirmation.targetTitle}" out of your library catalog references archive?`} confirmText="Erase Asset" />
     </div>
   );
 }
