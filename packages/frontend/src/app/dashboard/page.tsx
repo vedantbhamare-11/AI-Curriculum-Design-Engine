@@ -36,12 +36,11 @@ export default function CoreDashboardPage() {
       if (Array.isArray(data)) {
         setAssignments(data);
 
-        // Pre-aggregate structural statistics cleanly on-demand
         const metrics = data.reduce((acc, curr: Assignment) => {
           acc.total += 1;
           if (curr.status === 'completed') acc.completed += 1;
           else if (curr.status === 'failed') acc.failed += 1;
-          else acc.pending += 1; // Covers processing & pending states
+          else acc.pending += 1;
           return acc;
         }, { total: 0, completed: 0, pending: 0, failed: 0 });
 
@@ -59,16 +58,16 @@ export default function CoreDashboardPage() {
   }, []);
 
   return (
-    <div className="w-full min-h-screen bg-slate-50 py-8 px-6 sm:px-10 lg:px-12 animate-in fade-in duration-300 relative">
+    <div className="w-full min-h-screen bg-slate-50 py-8 px-6 sm:px-10 lg:px-12 animate-in fade-in duration-300 relative text-slate-900">
       <div className="max-w-6xl mx-auto space-y-6">
         
         {/* Upper Title Section Row */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between border-b border-slate-200 pb-5">
           <div>
             <h1 className="text-xl font-black text-slate-900 tracking-tight sm:text-2xl">
               Teacher Workspace Studio
             </h1>
-            <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">
+            <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mt-0.5">
               Platform Overview & Analytical Telemetry Control Panel
             </p>
           </div>
@@ -76,10 +75,10 @@ export default function CoreDashboardPage() {
           <button
             onClick={fetchDashboardData}
             disabled={isLoading}
-            className="h-9 w-9 bg-white border border-slate-200 hover:border-slate-300 text-slate-600 rounded-xl flex items-center justify-center shadow-sm transition-all active:scale-95 disabled:opacity-50"
+            className="h-10 w-10 bg-white border border-slate-200 hover:border-blue-600 hover:text-blue-600 text-slate-700 rounded-xl flex items-center justify-center shadow-sm transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
             title="Refresh Server Metrics Feed"
           >
-            <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin text-indigo-600' : ''}`} />
+            <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin text-blue-600' : 'text-slate-600'}`} />
           </button>
         </div>
 
@@ -100,7 +99,7 @@ export default function CoreDashboardPage() {
         {/* 3. Core Status Table Tracking Grid */}
         {isLoading && assignments.length === 0 ? (
           <div className="bg-white border border-slate-200 p-24 text-center rounded-2xl shadow-sm flex flex-col items-center justify-center gap-2">
-            <Loader2 className="h-6 w-6 animate-spin text-indigo-600" />
+            <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
             <p className="text-xs font-bold text-slate-400">Syncing live server generation pipelines...</p>
           </div>
         ) : (
