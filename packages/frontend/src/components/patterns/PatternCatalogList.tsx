@@ -4,7 +4,6 @@
 import React from 'react';
 import { Layers, HelpCircle, Award, Trash2, Sliders } from 'lucide-react';
 
-// 💡 Sync types to accept all properties from the database schema
 interface PatternSection {
   sectionLetter: string;
   sectionType: string;
@@ -30,8 +29,8 @@ interface PatternCatalogListProps {
 export function PatternCatalogList({ patterns, onSelectView, onStageDelete }: PatternCatalogListProps) {
   return (
     <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
-      <div className="flex items-center gap-2 pb-1.5 border-b border-slate-100">
-        <Sliders className="h-4 w-4 text-indigo-600 stroke-[2.2]" />
+      <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+        <Sliders className="h-4 w-4 text-slate-700 stroke-[2.2]" />
         <h3 className="text-xs font-black text-slate-800 uppercase tracking-wider">
           Saved Blueprints Registry
         </h3>
@@ -50,17 +49,17 @@ export function PatternCatalogList({ patterns, onSelectView, onStageDelete }: Pa
             return (
               <div 
                 key={pat._id}
-                onClick={() => onSelectView(pat as any)} // 💡 Typecast fallback guard for clean callback transitions
-                className="p-3.5 bg-slate-50/60 border border-slate-200 hover:border-indigo-500 hover:bg-white rounded-xl transition-all cursor-pointer flex items-center justify-between gap-4 group/item"
+                onClick={() => onSelectView(pat)}
+                className="p-3.5 bg-slate-50/60 border border-slate-200 hover:border-slate-300 hover:bg-white rounded-xl transition-all cursor-pointer flex items-center justify-between gap-4 group/item shadow-sm"
               >
                 <div className="space-y-1 min-w-0">
-                  <h4 className="text-xs font-black text-slate-900 truncate group-hover/item:text-indigo-600 transition-colors">
+                  <h4 className="text-xs font-black text-slate-900 truncate group-hover/item:text-slate-900 transition-colors">
                     {pat.patternName}
                   </h4>
                   <div className="flex items-center gap-3 text-[10px] font-bold text-slate-400">
                     <span className="flex items-center gap-0.5"><Layers className="h-3 w-3" /> {pat.sections.length} Sec</span>
                     <span className="flex items-center gap-0.5"><HelpCircle className="h-3 w-3" /> {totalQuestions} Qs</span>
-                    <span className="flex items-center gap-0.5 text-emerald-600"><Award className="h-3 w-3" /> {totalMarks}M</span>
+                    <span className="flex items-center gap-0.5 font-black text-slate-700"><Award className="h-3 w-3" /> {totalMarks}M</span>
                   </div>
                 </div>
 
@@ -70,7 +69,7 @@ export function PatternCatalogList({ patterns, onSelectView, onStageDelete }: Pa
                     e.stopPropagation();
                     onStageDelete(pat._id, pat.patternName);
                   }}
-                  className="h-8 w-8 bg-white border border-slate-200 text-slate-400 hover:text-rose-600 hover:border-rose-200 rounded-lg flex items-center justify-center transition-all opacity-0 group-hover/item:opacity-100 shrink-0 shadow-sm"
+                  className="h-8 w-8 bg-white border border-slate-200 text-slate-400 hover:text-red-600 hover:border-red-200 rounded-lg flex items-center justify-center transition-all opacity-100 lg:opacity-0 group-hover/item:opacity-100 shrink-0 shadow-sm cursor-pointer"
                   title="Permanently remove blueprint template"
                 >
                   <Trash2 className="h-3.5 w-3.5" />

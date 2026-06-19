@@ -24,7 +24,7 @@ export default function Sidebar({
 }: SidebarProps) {
   const pathname = usePathname();
   
-  // 💡 HYDRATE STRUCTURAL PREFERENCES FROM CLIENT-SIDE ZUSTAND MEMORY STRIPS
+  // Hydrate preferences instantly from local Zustand slice parameters
   const { teacherName, schoolName, departmentName } = useSettingsStore();
 
   const navItems = [
@@ -35,28 +35,31 @@ export default function Sidebar({
   ];
 
   return (
-    <div className="w-64 h-screen bg-white border-r border-slate-200/80 flex flex-col justify-between p-4 font-sans print:hidden shrink-0">
+    <div className="w-64 h-screen bg-white border-r border-slate-200 flex flex-col justify-between p-4 font-sans print:hidden shrink-0">
       <div className="space-y-6">
         {/* Brand Identity Logo Row */}
         <div className="flex items-center gap-3 px-2 py-1.5">
-          <div className="h-9 w-9 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-md shadow-indigo-100">
+          {/* 💡 FIXED: Updated from indigo-600 into explicit professional high-contrast dark theme style */}
+          <div className="h-9 w-9 bg-slate-900 rounded-xl flex items-center justify-center text-white shadow-sm">
             <GraduationCap className="h-5 w-5" />
           </div>
           <span className="font-black text-lg tracking-tight text-slate-900">
-            Assessment<span className="text-indigo-600">AI</span>
+            Assessment<span className="text-slate-900">AI</span>
           </span>
         </div>
 
         {/* Create Assignment Button */}
+        {/* 💡 FIXED: Converted to use your strict primary blueprint color variant parameter */}
         <Link
           href="/create"
-          className="w-full h-12 bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm rounded-2xl flex items-center justify-center gap-2 transition-all shadow-md active:scale-[0.98] border border-slate-800"
+          className="w-full h-12 bg-[#2563EB] hover:bg-blue-700 text-white font-bold text-sm rounded-2xl flex items-center justify-center gap-2 transition-all shadow-sm active:scale-[0.98] border border-blue-600 cursor-pointer"
         >
-          <Plus className="h-4 w-4 stroke-3" /> Create Assignment
+          <Plus className="h-4 w-4 stroke-[3] text-white" /> 
+          <span className="text-white">Create Assignment</span>
         </Link>
 
         {/* Navigation Link Stack */}
-        <nav className="space-y-1.5 pt-2">
+        <nav className="space-y-1 pt-2">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
@@ -65,10 +68,10 @@ export default function Sidebar({
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold tracking-wide transition-all ${
+                className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-black tracking-wide transition-all ${
                   isActive
                     ? "bg-slate-100 text-slate-900"
-                    : "text-slate-500 hover:text-slate-900 hover:bg-slate-50/80"
+                    : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"
                 }`}
               >
                 <div className="flex items-center gap-3">
@@ -87,10 +90,10 @@ export default function Sidebar({
         {/* Settings Navigation Link */}
         <Link
           href="/settings"
-          className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold tracking-wide transition-all ${
+          className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-black tracking-wide transition-all ${
             pathname === "/settings"
               ? "bg-slate-100 text-slate-900"
-              : "text-slate-500 hover:text-slate-900 hover:bg-slate-50/80"
+              : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"
           }`}
         >
           <Settings className="h-5 w-5 text-slate-400" />
@@ -100,12 +103,12 @@ export default function Sidebar({
         {/* Divider line */}
         <div className="h-px bg-slate-100 mx-2" />
 
-        {/* 🏫 TOPOLOGY PROFILE FOOTER CONTEXT BLOCK */}
-        <div className="flex items-center gap-3 p-3 bg-slate-50 border border-slate-100 rounded-2xl">
+        {/* School Profile Context Block */}
+        <div className="flex items-center gap-3 p-3 bg-slate-50 border border-slate-200 rounded-2xl shadow-inner">
           <img
             src={avatarUrl}
             alt={teacherName}
-            className="h-10 w-10 rounded-xl object-cover border border-slate-200/60 shadow-inner shrink-0"
+            className="h-10 w-10 rounded-xl object-cover border border-slate-200 shrink-0 shadow-sm"
           />
           <div className="flex-1 min-w-0">
             {/* Lead Teacher Name Anchor */}
@@ -116,7 +119,7 @@ export default function Sidebar({
             <p className="text-[10px] font-bold text-slate-500 truncate tracking-wide mt-0.5">
               {schoolName || "Institutional Branch"}
             </p>
-            <p className="text-[9px] font-semibold text-slate-400 truncate tracking-wider uppercase mt-0.5">
+            <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider truncate mt-0.5">
               {departmentName || "General Faculty"}
             </p>
           </div>
