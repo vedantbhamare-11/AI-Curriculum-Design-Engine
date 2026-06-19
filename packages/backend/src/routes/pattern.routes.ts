@@ -47,4 +47,24 @@ router.get('/', async (req, res) => {
   }
 });
 
+// 🗑️ DELETE /api/patterns/:id - Purges a saved layout pattern configuration profile from MongoDB
+router.delete('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log(`🗑️ Processing structural purge for Pattern Template ID: ${id}`);
+
+    const deletedPattern = await Pattern.findByIdAndDelete(id);
+
+    if (!deletedPattern) {
+      return res.status(404).json({ error: 'Target paper pattern configuration profile not found.' });
+    }
+
+    console.log(`✅ Pattern template "${deletedPattern.patternName}" successfully scrubbed out.`);
+    return res.json({ message: 'Paper pattern profile permanently erased successfully.' });
+  } catch (error: any) {
+    console.error('❌ Failed to execute pattern profile deletion:', error);
+    return res.status(500).json({ error: 'Internal server error while purging the pattern profile.' });
+  }
+});
+
 export default router;
