@@ -2,10 +2,11 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
+import Link from 'next/link'; 
 import { useAssignmentStore } from '@/store/useAssignmentStore';
 import { useRouter } from 'next/navigation';
 import { LibraryHeader } from '@/components/library/LibraryHeader';
+import { LibraryFilters } from '@/components/library/LibraryFilters'; // 💡 Imported Filters
 import { LibraryCard } from '@/components/library/LibraryCard';
 import { FeedbackModal } from '@/components/vault/FeedbackModal';
 import { ConfirmationModal } from '@/components/vault/ConfirmationModal';
@@ -28,10 +29,11 @@ export default function MyLibraryPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  // Track ongoing deletion cycles
-  const [deletingIds, setDeletingIds] = useState<Record<string, boolean>>({});
+  // 💡 Search & Filter Local Pipeline States
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedSubject, setSelectedSubject] = useState('All');
   
-  // Custom Modal States
+  const [deletingIds, setDeletingIds] = useState<Record<string, boolean>>({});
   const [activeDeleteId, setActiveDeleteId] = useState<string | null>(null);
   
   const [feedbackState, setFeedbackState] = useState<{
@@ -74,7 +76,7 @@ export default function MyLibraryPage() {
       }
       
       if (!Array.isArray(data)) {
-        throw new Error("Expected collection array history list, received alternative alternative schema model.");
+        throw new Error("Expected collection array history list.");
       }
       
       const completedPapers = data.filter((item: any) => 
@@ -86,7 +88,7 @@ export default function MyLibraryPage() {
 
       setAssessments(completedPapers);
     } catch (err: any) {
-      console.error("🛑 Comprehensive library load exception detailed logs:", err);
+      console.error("🛑 Library exception detailed logs:", err);
       setError(err.message || 'Error pulling your historical files.');
     } finally {
       setIsLoading(false);
@@ -117,7 +119,6 @@ export default function MyLibraryPage() {
     if (!activeDeleteId) return;
     const targetId = activeDeleteId;
     
-    // Find metadata title matching active state target reference
     const targetDoc = assessments.find(a => a._id === targetId);
     const docTitle = targetDoc ? `${targetDoc.subject} Blueprint` : "Target Assessment";
 
@@ -134,7 +135,6 @@ export default function MyLibraryPage() {
 
       setAssessments(prev => prev.filter(item => item._id !== targetId));
 
-      // Clean success feedback popup
       setFeedbackState({
         isOpen: true,
         type: 'success',
@@ -155,59 +155,84 @@ export default function MyLibraryPage() {
     }
   };
 
-  return (
-    <div className="w-full min-h-screen bg-slate-50 py-8 px-6 sm:px-10 lg:px-12 relative animate-in fade-in duration-300">
-      <div className="max-w-5xl mx-auto space-y-6">
-        
-        {/* Core Modularized Header */}
-        <LibraryHeader paperCount={assessments.length} />
+  // 💡 Real-time Evaluation Filtering Engine
+  const filteredAssessments = assessments.filter(paper => {
+    const matchesSearch = 
+      paper.subject.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      paper.className.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesSubject = selectedSubject === 'All' || paper.subject.toLowerCase() === selectedSubject.toLowerCase();
+    
+    return matchesSearch && matchesSubject;
+  });
 
-        {/* ⏳ LOADING RUNNING TIMEFRAME */}
+  return (
+    <div className="w-full min-h-screen bg-slate-50 py-8 px-6 sm:px-10 lg:px-12 relative animate-in fade-in duration-300 text-slate-900 space-y-6">
+      
+      <LibraryHeader paperCount={assessments.length} />
+
+      {/* 💡 Filters Input Component Block */}
+      <LibraryFilters 
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        selectedSubject={selectedSubject}
+        setSelectedSubject={setSelectedSubject}
+      />
+
+      <div>
+        {/* ⏳ LOADING STATE VIEW */}
         {isLoading && (
-          <div className="bg-white border border-slate-200/80 rounded-3xl p-16 text-center shadow-sm flex flex-col items-center justify-center gap-3">
-            <Loader2 className="h-8 w-8 text-indigo-600 animate-spin" />
-            <p className="text-sm font-bold text-slate-500">Querying your MongoDB index collections history...</p>
+          <div className="bg-white border border-slate-200 rounded-2xl p-16 text-center shadow-sm flex flex-col items-center justify-center gap-2">
+            <Loader2 className="h-6 w-6 text-slate-900 animate-spin" />
+            <p className="text-xs font-bold text-slate-400">Querying your database archive collections history...</p>
           </div>
         )}
 
-        {/* ❌ ERRONEOUS LOG CAP INTERCEPTOR */}
+        {/* ❌ ERRONEOUS SYSTEM INTERCEPTOR */}
         {error && !isLoading && (
-          <div className="bg-white border border-slate-200 rounded-3xl p-8 text-center max-w-xl mx-auto space-y-3 shadow-sm">
-            <p className="text-sm font-black text-rose-600 uppercase tracking-wider">Connection Interrupted</p>
-            <p className="text-xs text-slate-500 font-semibold leading-relaxed">
-              {error}. Ensure your backend server cluster process terminal tab is actively running on port 5001.
-            </p>
-            <button onClick={fetchLibrary} className="h-9 px-4 bg-slate-900 text-white font-bold text-xs rounded-xl hover:bg-slate-800 transition-all">
+          <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center max-w-xl mx-auto space-y-4 shadow-sm">
+            <div className="space-y-1">
+              <p className="text-xs font-black text-red-600 uppercase tracking-wider">Connection Interrupted</p>
+              <p className="text-xs text-slate-500 font-semibold leading-relaxed">
+                {error}. Verify your backend microservice environment task is actively listening on port 5001.
+              </p>
+            </div>
+            <button 
+              onClick={fetchLibrary} 
+              className="h-9 px-4 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-sm transition-all cursor-pointer"
+            >
               Retry Sync
             </button>
           </div>
         )}
 
-        {/* 📭 VACANT INDEX OVERLAY BOUNDS */}
-        {!isLoading && !error && assessments.length === 0 && (
-          <div className="bg-white border border-slate-200/80 rounded-3xl p-16 text-center shadow-sm flex flex-col items-center justify-center max-w-md mx-auto space-y-5">
-            <div className="p-3.5 bg-slate-50 text-slate-400 rounded-2xl border border-slate-100">
-              <Inbox className="h-6 w-6 stroke-[2.2]" />
+        {/* 📭 EMPTY STATE / SEARCH EXCLUSIONS VIEW */}
+        {!isLoading && !error && filteredAssessments.length === 0 && (
+          <div className="bg-white border border-slate-200 rounded-2xl p-16 text-center shadow-sm flex flex-col items-center justify-center max-w-md mx-auto space-y-5">
+            <div className="p-3 bg-slate-50 text-slate-400 rounded-xl border border-slate-200 shadow-sm">
+              <Inbox className="h-5 w-5 stroke-[2.2]" />
             </div>
             <div className="space-y-1">
-              <h3 className="text-sm font-black text-slate-900">No Assessments Stored Yet</h3>
-              <p className="text-xs text-slate-500 max-w-xs font-semibold leading-relaxed">
-                Your archive collection has no completed sheets. Run your generation configuration wizard to build your first test blueprint!
+              <h3 className="text-sm font-black text-slate-900">No Target Match Found</h3>
+              <p className="text-xs text-slate-400 max-w-xs font-semibold leading-relaxed">
+                We couldn't locate any saved exam sheets or patterns matching your query input fields. Try refining your keywords!
               </p>
             </div>
-            <Link
-              href="/create"
-              className="h-10 px-5 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-md shadow-indigo-100 flex items-center justify-center transition-all active:scale-95"
-            >
-              Generate First Paper
-            </Link>
+            {assessments.length === 0 && (
+              <Link
+                href="/create"
+                className="h-10 px-5 bg-[#2563EB] hover:bg-blue-700 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-sm flex items-center justify-center transition-all active:scale-95"
+              >
+                Generate First Paper
+              </Link>
+            )}
           </div>
         )}
 
-        {/* 📊 ACTIVE CARDS TEMPLATE FEED */}
-        {!isLoading && !error && assessments.length > 0 && (
+        {/* 📊 DYNAMIC FILTERED CARDS GRID */}
+        {!isLoading && !error && filteredAssessments.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {assessments.map((paper) => (
+            {filteredAssessments.map((paper) => (
               <LibraryCard 
                 key={paper._id}
                 paper={paper}
@@ -220,24 +245,8 @@ export default function MyLibraryPage() {
         )}
       </div>
 
-      {/* 💡 MODULAR FEEDBACK POPOUTS */}
-      <FeedbackModal 
-        isOpen={feedbackState.isOpen}
-        onClose={() => setFeedbackState(prev => ({ ...prev, isOpen: false }))}
-        type={feedbackState.type}
-        title={feedbackState.title}
-        message={feedbackState.message}
-      />
-
-      {/* 💡 MODULAR DESTRUCTIVE CONFIRMATION VIEWPORTS */}
-      <ConfirmationModal 
-        isOpen={!!activeDeleteId}
-        onClose={() => setActiveDeleteId(null)}
-        onConfirm={executeDeleteSequence}
-        title="Confirm Permanent Deletion"
-        message="Are you absolutely sure you want to discard this evaluation blueprint? This action will instantly wipe your quiz metrics and completely destroy the document mapping sequence parameters inside MongoDB records permanently."
-        confirmText="Confirm Delete"
-      />
+      <FeedbackModal isOpen={feedbackState.isOpen} onClose={() => setFeedbackState(prev => ({ ...prev, isOpen: false }))} type={feedbackState.type} title={feedbackState.title} message={feedbackState.message} />
+      <ConfirmationModal isOpen={!!activeDeleteId} onClose={() => setActiveDeleteId(null)} onConfirm={executeDeleteSequence} title="Confirm Permanent Deletion" message="Are you absolutely sure you want to discard this evaluation blueprint? This will permanently erase quiz text metrics from database records." confirmText="Erase Asset Record" />
     </div>
   );
 }
