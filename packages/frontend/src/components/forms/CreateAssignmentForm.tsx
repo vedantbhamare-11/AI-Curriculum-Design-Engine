@@ -4,7 +4,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAssignmentStore } from '@/store/useAssignmentStore';
 import { 
-  Sliders, 
   BookOpen, 
   GraduationCap, 
   Calendar, 
@@ -43,12 +42,10 @@ export default function UnifiedCreationForm() {
   const store = useAssignmentStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Functional Local Synchronized UI States
   const [patterns, setPatterns] = useState<PatternOption[]>([]);
   const [vaultDocs, setVaultDocs] = useState<VaultDocOption[]>([]); 
   const [selectedPattern, setSelectedPattern] = useState<PatternOption | null>(null);
   
-  // SECURE LOCAL FORM STATE BINDINGS: Eliminates asynchronous state lag completely
   const [subject, setSubject] = useState<string>('');
   const [className, setClassName] = useState<string>('');
   const [dueDate, setDueDate] = useState<string>('');
@@ -59,20 +56,17 @@ export default function UnifiedCreationForm() {
   const [loadingMessage, setLoadingMessage] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
 
-  // 1. Hydrate saved paper templates AND vault entries concurrently from MongoDB on mount
   useEffect(() => {
     async function fetchFormDependencies() {
       try {
         setError(null);
         
-        // Fetch Exam Blueprint Profiles
         const patternsRes = await fetch('http://localhost:5001/api/patterns');
         if (patternsRes.ok) {
           const patternsData = await patternsRes.json();
           setPatterns(patternsData);
         }
 
-        // Fetch actual textbook assets dynamically out of your Context Vault
         const vaultRes = await fetch('http://localhost:5001/api/vault');
         if (vaultRes.ok) {
           const vaultData = await vaultRes.json();
@@ -86,7 +80,6 @@ export default function UnifiedCreationForm() {
     fetchFormDependencies();
   }, []);
 
-  // 2. Poll progress status check logs from backend loop until generation completes
   const pollGenerationStatus = async (assignmentId: string) => {
     const interval = setInterval(async () => {
       try {
@@ -95,12 +88,11 @@ export default function UnifiedCreationForm() {
 
         if (data.status === 'completed') {
           clearInterval(interval);
-          // Sync final results to global store for viewer canvas
           store.updateFormFields({ 
             generationStatus: 'completed',
             generatedPaper: data
           });
-          store.setStep(4); // Direct over into Step 4 Document Viewer!
+          store.setStep(4); 
         } else if (data.status === 'failed') {
           clearInterval(interval);
           store.updateFormFields({ generationStatus: 'failed' });
@@ -112,7 +104,6 @@ export default function UnifiedCreationForm() {
     }, 2000);
   };
 
-  // 3. Assemble parameters and fire off multipart FormData package payload
   const handleTriggerGeneration = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -137,10 +128,8 @@ export default function UnifiedCreationForm() {
         secondaryContextId: localVaultId || null
       };
       
-      console.log("📤 Packaging Context Payload Metadata Bundle:", payloadMetadata);
       formData.append('data', JSON.stringify(payloadMetadata));
 
-      // 💡 FIXED: Append key modified from 'primaryFile' to match your backend's multer upload setup perfectly!
       if (store.primaryFile) {
         formData.append('primaryFile', store.primaryFile); 
       }
@@ -175,16 +164,15 @@ export default function UnifiedCreationForm() {
     }
   };
 
-  // Pre-calculate aggregate matrix summary statistics out of the loaded blueprint details
   const totalQuestions = selectedPattern?.sections.reduce((sum, s) => sum + s.questionCount, 0) || 0;
-  const totalMarks = selectedPattern?.sections.reduce((sum, s) => sum + (sum + (s.questionCount * s.marksPerQuestion)), 0) || 0;
+  const totalMarks = selectedPattern?.sections.reduce((sum, s) => sum + (s.questionCount * s.marksPerQuestion), 0) || 0;
 
   if (store.generationStatus === 'pending' || store.generationStatus === 'processing') {
     return (
       <div className="bg-white border border-slate-200 p-12 rounded-2xl text-center space-y-4 shadow-sm flex flex-col items-center justify-center min-h-[450px]">
-        <Loader2 className="h-10 w-10 text-indigo-600 animate-spin" />
-        <h3 className="text-lg font-black text-slate-900">Assembling Your Assessment</h3>
-        <p className="text-sm text-slate-600 max-w-md mx-auto font-semibold bg-slate-50 px-4 py-2.5 rounded-xl border border-slate-100">
+        <Loader2 className="h-8 w-8 text-slate-900 animate-spin" />
+        <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider">Assembling Your Assessment</h3>
+        <p className="text-xs font-bold text-slate-500 max-w-md mx-auto bg-slate-50 px-4 py-3 rounded-xl border border-slate-200">
           {loadingMessage}
         </p>
       </div>
@@ -198,27 +186,27 @@ export default function UnifiedCreationForm() {
       <div className="lg:col-span-2 space-y-6">
         
         {/* Core Administrative Properties Setup Box */}
-        <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm space-y-5">
+        <div className="bg-white border border-slate-200 p-5 sm:p-6 rounded-2xl shadow-sm space-y-5">
           <div>
-            <h3 className="text-base font-black text-slate-900 uppercase tracking-tight">Scope Parameters</h3>
-            <p className="text-xs text-slate-500 font-medium mt-0.5">Define student group segments, subjects, and parameters boundaries.</p>
+            <h3 className="text-xs font-black text-slate-800 uppercase tracking-wider">Scope Parameters</h3>
+            <p className="text-xs text-slate-400 font-bold mt-0.5">Define student group segments, subjects, and parameters boundaries.</p>
           </div>
 
           {error && (
-            <div className="p-4 bg-rose-50 border border-rose-100 text-rose-700 text-xs font-bold rounded-xl">
+            <div className="p-4 bg-red-50 border border-red-100 text-red-700 text-xs font-bold rounded-xl">
               ⚠️ {error}
             </div>
           )}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="text-[11px] font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-                <BookOpen className="h-3.5 w-3.5 text-indigo-600" /> Subject Field
+              <label className="text-[11px] font-black text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                <BookOpen className="h-4 w-4 text-slate-400" /> Subject Field
               </label>
               <select
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
-                className="w-full h-11 px-3.5 border border-slate-300 bg-white text-slate-900 text-sm font-semibold rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-600"
+                className="w-full h-11 px-3.5 border border-slate-200 bg-white text-slate-900 text-sm font-semibold rounded-xl focus:outline-none focus:border-slate-400 cursor-pointer"
               >
                 <option value="">Select Target Subject...</option>
                 {['Science', 'Mathematics', 'English Literature', 'History', 'Geography', 'Computer Science'].map((sub) => (
@@ -228,82 +216,80 @@ export default function UnifiedCreationForm() {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[11px] font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-                <GraduationCap className="h-3.5 w-3.5 text-indigo-600" /> Grade / Class Level
+              <label className="text-[11px] font-black text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                <GraduationCap className="h-4 w-4 text-slate-400" /> Grade / Class Level
               </label>
               <input
                 type="text"
                 placeholder="e.g., Grade 8, Class 10-A"
                 value={className}
                 onChange={(e) => setClassName(e.target.value)}
-                className="w-full h-11 px-4 border border-slate-300 bg-white text-slate-900 placeholder:text-slate-400 text-sm font-semibold rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-600"
+                className="w-full h-11 px-4 border border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 text-sm font-semibold rounded-xl focus:outline-none focus:border-slate-400"
               />
             </div>
 
             <div className="space-y-1.5 sm:col-span-2">
-              <label className="text-[11px] font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-                <Calendar className="h-3.5 w-3.5 text-indigo-600" /> Assessment Due Date
+              <label className="text-[11px] font-black text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                <Calendar className="h-4 w-4 text-slate-400" /> Assessment Due Date
               </label>
               <input
                 type="date"
                 value={dueDate}
                 onChange={(e) => setDueDate(e.target.value)}
-                className="w-full h-11 px-4 border border-slate-300 bg-white text-slate-900 text-sm font-semibold rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-600"
+                className="w-full h-11 px-4 border border-slate-200 bg-white text-slate-900 text-sm font-semibold rounded-xl focus:outline-none focus:border-slate-400 cursor-pointer"
               />
             </div>
           </div>
         </div>
 
         {/* Dynamic Dual-Context Data Ingest Dropzones Container */}
-        <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm space-y-6">
+        <div className="bg-white border border-slate-200 p-5 sm:p-6 rounded-2xl shadow-sm space-y-6">
           <div>
-            <h3 className="text-base font-black text-slate-900 uppercase tracking-tight">Contextual Grounding Strategy</h3>
-            <p className="text-xs text-slate-500 font-medium mt-0.5">Control the information source grounding priorities layer parameters.</p>
+            <h3 className="text-xs font-black text-slate-800 uppercase tracking-wider">Contextual Grounding Strategy</h3>
+            <p className="text-xs text-slate-400 font-bold mt-0.5">Control the information source grounding priorities layer parameters.</p>
           </div>
 
           {/* 1st Priority Context File Element Block */}
           <div className="space-y-2">
-            <label className="text-[11px] font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-              <UploadCloud className="h-4 w-4 text-indigo-600" /> $1st Priority Immediate Context (Session Lecture Notes / Whiteboard Upload)
+            <label className="text-[11px] font-black text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+              <UploadCloud className="h-4 w-4 text-slate-400" /> 1st Priority Immediate Context (Lecture Notes / Whiteboard Upload)
             </label>
             
             {!store.primaryFile ? (
               <div 
                 onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-slate-300 hover:border-indigo-500 bg-slate-50/50 hover:bg-indigo-50/10 rounded-2xl p-6 text-center cursor-pointer transition-all space-y-1 group"
+                className="border-2 border-dashed border-slate-200 hover:border-slate-300 bg-slate-50/50 rounded-xl p-6 text-center cursor-pointer transition-all space-y-1 group"
               >
-                <UploadCloud className="h-7 w-7 text-slate-400 group-hover:text-indigo-500 mx-auto transition-colors" />
-                <p className="text-xs font-black text-slate-700 group-hover:text-slate-900">Attach temporary handwritten text lesson file snapshot</p>
-                <p className="text-[10px] text-slate-400 font-semibold">PDF, TXT or Markdown up to 10MB</p>
+                <UploadCloud className="h-6 w-6 text-slate-400 group-hover:text-slate-600 mx-auto transition-colors stroke-[2.2]" />
+                <p className="text-xs font-black text-slate-700">Attach temporary handwritten text lesson file snapshot</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">PDF, TXT or Markdown up to 10MB</p>
                 <input type="file" ref={fileInputRef} onChange={handleFileChange} accept=".pdf,.txt,.md" className="hidden" />
               </div>
             ) : (
-              <div className="flex items-center justify-between p-3 bg-indigo-50/40 border border-indigo-100 rounded-xl">
+              <div className="flex items-center justify-between p-3.5 bg-slate-50 border border-slate-200 rounded-xl">
                 <div className="flex items-center gap-3">
-                  <div className="h-9 w-9 bg-indigo-600 rounded-lg flex items-center justify-center text-white shadow-sm">
-                    <FileText className="h-4 w-4" />
-                  </div>
+                  <div className="h-8 w-12 bg-slate-900 text-white flex items-center justify-center rounded-lg font-black text-[10px] uppercase tracking-wider">Source</div>
                   <div className="min-w-0">
                     <p className="text-xs font-black text-slate-800 truncate max-w-[200px] sm:max-w-xs">{store.primaryFile.name}</p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{(store.primaryFile.size / (1024 * 1024)).toFixed(2)} MB • Anchor Grounding</p>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wide">{(store.primaryFile.size / (1024 * 1024)).toFixed(2)} MB • Anchor Grounding</p>
                   </div>
                 </div>
-                <button type="button" onClick={() => store.setPrimaryFile(null)} className="p-1 border border-slate-200 hover:text-rose-600 bg-white rounded-lg transition-all">
-                  <X className="h-3.5 w-3.5 stroke-[2.5]" />
+                <button type="button" onClick={() => store.setPrimaryFile(null)} className="p-1 border border-slate-200 hover:text-red-600 bg-white rounded-lg transition-all cursor-pointer">
+                  <X className="h-4 w-4 stroke-[2.5]" />
                 </button>
               </div>
             )}
           </div>
 
           {/* 2nd Priority Context Permanent Vault Connector Selector Dropdown */}
-          <div className="space-y-1.5 border-t border-slate-100 pt-4">
-            <label className="text-[11px] font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-              <FolderHeart className="h-4 w-4 text-indigo-600" /> $2nd Priority Cross-Reference Book Link (Loaded from Reference Context Vault)
+          <div className="space-y-1.5 border-t border-slate-100 pt-5">
+            <label className="text-[11px] font-black text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+              <FolderHeart className="h-4 w-4 text-slate-400" /> 2nd Priority Cross-Reference Book Link (Loaded from Reference Context Vault)
             </label>
             <select
               value={localVaultId}
               onChange={(e) => setLocalVaultId(e.target.value)}
-              className="w-full h-11 px-3.5 border border-slate-300 bg-white text-slate-900 text-xs font-black rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-600 cursor-pointer"
+              className="w-full h-11 px-3.5 border border-slate-200 bg-white text-slate-900 text-xs font-black rounded-xl focus:outline-none focus:border-slate-400 cursor-pointer"
             >
               <option value="">-- Choose Background Reference Book Material (Optional) --</option>
               {vaultDocs.map(doc => (
@@ -313,16 +299,16 @@ export default function UnifiedCreationForm() {
           </div>
 
           {/* Custom prompts field block instructions parameters focus text areas */}
-          <div className="space-y-1.5 border-t border-slate-100 pt-4">
-            <label className="text-[11px] font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-              <ListChecks className="h-3.5 w-3.5 text-indigo-600" /> Specific Guidance Directives Prompt Prompts
+          <div className="space-y-1.5 border-t border-slate-100 pt-5">
+            <label className="text-[11px] font-black text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+              <ListChecks className="h-4 w-4 text-slate-400" /> Specific Guidance Directives Prompts
             </label>
             <textarea
               rows={2}
               placeholder="e.g., Focus exclusively on structural evaluation balancing equations. Do not test history variables outside lesson bounds."
               value={additionalInstructions}
               onChange={(e) => setAdditionalInstructions(e.target.value)}
-              className="w-full p-3.5 border border-slate-300 bg-white text-slate-900 placeholder:text-slate-400 text-sm font-semibold rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-600 focus:border-indigo-600 Richmond resize-none"
+              className="w-full p-3.5 border border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 text-sm font-semibold rounded-xl focus:outline-none focus:border-slate-400 resize-none animate-none"
             />
           </div>
         </div>
@@ -333,10 +319,10 @@ export default function UnifiedCreationForm() {
       <div className="space-y-6 lg:sticky lg:top-6">
         
         {/* Pattern Binder Core Profile Custom Selector */}
-        <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm space-y-4">
+        <div className="bg-white border border-slate-200 p-5 sm:p-6 rounded-2xl shadow-sm space-y-4">
           <div>
-            <h3 className="text-base font-black text-slate-900 uppercase tracking-tight">Exam Blueprint Template</h3>
-            <p className="text-xs text-slate-500 font-medium mt-0.5">Enforce custom school structural point weight pattern configurations profiles rules.</p>
+            <h3 className="text-xs font-black text-slate-800 uppercase tracking-wider">Exam Blueprint Template</h3>
+            <p className="text-xs text-slate-400 font-bold mt-0.5">Enforce custom school structural point weight pattern configurations profiles rules.</p>
           </div>
 
           <div className="space-y-1.5">
@@ -348,7 +334,7 @@ export default function UnifiedCreationForm() {
                 const match = patterns.find(p => p._id === id) || null;
                 setSelectedPattern(match);
               }}
-              className="w-full h-11 px-3 border border-slate-300 bg-white text-slate-900 text-xs font-black rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-600 cursor-pointer"
+              className="w-full h-11 px-3 border border-slate-200 bg-white text-slate-900 text-xs font-black rounded-xl focus:outline-none focus:border-slate-400 cursor-pointer"
             >
               <option value="">-- Select Saved Exam Pattern Blueprint --</option>
               {patterns.map(p => (
@@ -359,20 +345,20 @@ export default function UnifiedCreationForm() {
 
           {/* Dynamic Sections Table Distribution Overview Summary Strip */}
           {selectedPattern && (
-            <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
-              <div className="flex justify-between items-center text-xs font-black text-slate-500 uppercase tracking-wider border-b border-slate-200/60 pb-2">
-                <span>Blueprint Breakdowns</span>
-                <span className="text-indigo-600 font-black">{totalMarks} Marks Max</span>
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3 shadow-inner">
+              <div className="flex justify-between items-center text-[10px] font-black text-slate-400 uppercase tracking-wider border-b border-slate-200 pb-2">
+                <span>Blueprint Breakdown</span>
+                <span className="text-slate-900 font-black tracking-normal normal-case">{totalMarks} Marks Max</span>
               </div>
               
-              <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+              <div className="space-y-2.5 max-h-48 overflow-y-auto pr-1 scrollbar-none">
                 {selectedPattern.sections.map(s => (
-                  <div key={s.sectionLetter} className="flex justify-between items-start text-xs leading-normal">
-                    <div className="font-bold text-slate-800">
-                      <span className="font-black text-indigo-600 mr-1.5">Sec {s.sectionLetter}:</span>
+                  <div key={s.sectionLetter} className="flex justify-between items-start text-xs leading-normal font-bold">
+                    <div className="text-slate-600">
+                      <span className="font-black text-slate-900 mr-1">Sec {s.sectionLetter}:</span>
                       {s.sectionType}
                     </div>
-                    <div className="font-black text-slate-500 text-right shrink-0 ml-2">
+                    <div className="text-slate-400 shrink-0 ml-2">
                       {s.questionCount} × {s.marksPerQuestion}m
                     </div>
                   </div>
@@ -382,11 +368,12 @@ export default function UnifiedCreationForm() {
           )}
 
           {/* Core submission execution action button block */}
+          {/* 💡 FIXED: Configured button back into your specified primary signature variant colors */}
           <button
             type="submit"
-            className="w-full h-12 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-sm rounded-xl flex items-center justify-center gap-2 transition-all shadow-md active:scale-[0.98]"
+            className="w-full h-11 bg-[#2563EB] hover:bg-blue-700 text-white font-black text-xs uppercase tracking-wider rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm active:scale-[0.98] cursor-pointer"
           >
-            <Sparkles className="h-4 w-4" /> Run Assessment Engine
+            <Sparkles className="h-4 w-4 stroke-[2.2]" /> Run Assessment Engine
           </button>
         </div>
 
