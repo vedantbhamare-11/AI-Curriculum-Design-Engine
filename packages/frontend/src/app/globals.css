@@ -1,34 +1,80 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Core Base Layout Tokens */
+  --background: #F8FAFC; /* Soft off-white to eliminate screen glare */
+  --foreground: #0F172A; /* High-contrast deep slate navy */
+  
+  /* Standardized Academic Color Palette Matrix */
+  --color-school-navy: #0F172A;     /* Primary Structural Base */
+  --color-school-ink: #2563EB;      /* Classic Fountain Pen Blue Accent */
+  --color-school-amber: #D97706;    /* Warm Gold Highlight / Warning Accent */
+  --color-school-emerald: #059669;  /* Perfect Grading Green Success Marker */
+  --color-school-rose: #DC2626;     /* Mistakes Correction Red Line Indicator */
+  
+  /* Tint Accents for Structural Card Backgrounds */
+  --color-tint-slate: #F1F5F9;
+  --color-tint-blue: #EFF6FF;
+  --color-tint-amber: #FEF3C7;
+  --color-tint-emerald: #ECFDF5;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  
+  /* Expose Custom Palette Design Tokens natively to Tailwind className compilation bindings */
+  --color-school-navy: var(--color-school-navy);
+  --color-school-ink: var(--color-school-ink);
+  --color-school-amber: var(--color-school-amber);
+  --color-school-emerald: var(--color-school-emerald);
+  --color-school-rose: var(--color-school-rose);
+  
+  --color-tint-slate: var(--color-tint-slate);
+  --color-tint-blue: var(--color-tint-blue);
+  --color-tint-amber: var(--color-tint-amber);
+  --color-tint-emerald: var(--color-tint-emerald);
+
+  --font-sans: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  --font-mono: var(--font-geist-mono), monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* ⚡ Smooth Component Transition & Baseline Utility Defaults */
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+/* Custom premium input interactions uniform style */
+input, select, textarea {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Premium micro-interactions utilities */
+.academic-card-lift {
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.15s ease, box-shadow 0.2s ease;
+}
+.academic-card-lift:hover {
+  transform: translateY(-2px);
+}
+
+/* Hide standard scrollbars cleanly across dashboard panels */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* 🖨️ White-Label Clean Academic Print Overrides */
 @media print {
   @page {
-    /* 💡 Forcing total 0 margins completely breaks the browser's ability 
-       to print default headers, footers, or timestamps! */
+    /* Forcing total 0 margins completely breaks browser header/footer layout boundaries */
     margin: 0 !important; 
   }
   
@@ -41,11 +87,16 @@ body {
     background: #ffffff !important;
     color: #000000 !important;
     
-    /* 💡 Since @page margin is 0, we apply padding to the body so 
-       the actual question paper content doesn't touch the physical paper edges */
+    /* Apply deliberate standard padding so question contents never touch physical sheet borders */
     padding: 20mm 15mm 20mm 15mm !important;
     
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
+  }
+  
+  /* Enforce clean break matrices for multi-section exams print pipelines */
+  .print-page-break {
+    page-break-before: always !important;
+    break-before: page !important;
   }
 }
