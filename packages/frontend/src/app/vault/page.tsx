@@ -9,6 +9,7 @@ import { UploadModal } from '@/components/vault/UploadModal';
 import { FeedbackModal } from '@/components/vault/FeedbackModal';
 import { ConfirmationModal } from '@/components/vault/ConfirmationModal';
 import { X, Sparkles, BookOpen, Loader2, FilePlay, FileText } from 'lucide-react';
+import { apiFetch } from '@/utils/api'; // 🔥 Centralized environment wrapper utility linked
 
 interface VaultDocument {
   _id: string;
@@ -56,7 +57,8 @@ export default function ContextVaultPage() {
   async function loadVaultCatalog() {
     try {
       setIsLoading(true);
-      const res = await fetch('http://localhost:5001/api/vault');
+      // 🚀 PRODUCTION UPGRADE: Replaced local port string with adaptive client wrapper
+      const res = await apiFetch('/api/vault');
       const data = await res.json();
       if (Array.isArray(data)) setVaultDocs(data);
     } catch (err) {
@@ -76,7 +78,8 @@ export default function ContextVaultPage() {
       if (!baselineMatch) return;
       setActivePreviewDoc(baselineMatch);
 
-      const res = await fetch(`http://localhost:5001/api/vault/${docId}`);
+      // 🚀 PRODUCTION UPGRADE: Replaced hardcoded localhost reference
+      const res = await apiFetch(`/api/vault/${docId}`);
       if (!res.ok) throw new Error('Failed to pull deep material data lines.');
       
       const completeRichDoc = await res.json();
@@ -91,7 +94,8 @@ export default function ContextVaultPage() {
       setIsLoadingPdf(true);
       setPdfModalTitle(title);
       
-      const res = await fetch(`http://localhost:5001/api/vault/${docId}`);
+      // 🚀 PRODUCTION UPGRADE: Routing file stream allocations over clean paths
+      const res = await apiFetch(`/api/vault/${docId}`);
       if (!res.ok) throw new Error('Failed to pull file streams.');
       
       const completeRichDoc: VaultDocument = await res.json();
@@ -139,7 +143,8 @@ export default function ContextVaultPage() {
     if (!targetId) return;
 
     try {
-      const res = await fetch(`http://localhost:5001/api/vault/${targetId}`, { method: 'DELETE' });
+      // 🚀 PRODUCTION UPGRADE: Abstracted cloud deletion request loop mapping
+      const res = await apiFetch(`/api/vault/${targetId}`, { method: 'DELETE' });
       const result = await res.json();
       
       if (!res.ok) throw new Error(result.error || 'Server rejected document archive deletion pass.');
@@ -184,7 +189,12 @@ export default function ContextVaultPage() {
       }));
       formData.append('vaultFile', uploadFile); 
 
-      const res = await fetch('http://localhost:5001/api/vault', { method: 'POST', body: formData });
+      // 🚀 PRODUCTION UPGRADE: Clean multipart pipeline upload via unified config context
+      const res = await apiFetch('/api/vault', { 
+        method: 'POST', 
+        body: formData,
+        headers: {} // 💡 Let the browser assign its native multi-part form border boundary headers cleanly!
+      });
       if (!res.ok) throw new Error("Backend save failure.");
 
       setFeedbackState({

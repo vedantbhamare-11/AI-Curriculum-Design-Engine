@@ -14,6 +14,7 @@ import {
   Sparkles, 
   Loader2
 } from 'lucide-react';
+import { apiFetch } from '@/utils/api'; // 🔥 Centralized environment wrapper utility
 
 interface SectionInput {
   sectionLetter: string;
@@ -66,7 +67,8 @@ export default function CustomPatternsPage() {
 
   async function fetchPatternsCatalog() {
     try {
-      const res = await fetch('http://localhost:5001/api/patterns');
+      // 🚀 PRODUCTION UPGRADE: Swapped raw local endpoint layout for relative workspace paths
+      const res = await apiFetch('/api/patterns');
       const data = await res.json();
       if (Array.isArray(data)) setSavedPatterns(data);
     } catch (err) {
@@ -123,9 +125,10 @@ export default function CustomPatternsPage() {
 
     try {
       setIsSubmitting(true);
-      const response = await fetch('http://localhost:5001/api/patterns', {
+      
+      // 🚀 PRODUCTION UPGRADE: Dynamic cloud injection schema routing rules pass
+      const response = await apiFetch('/api/patterns', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           patternName: patternName.trim(),
           subjectDefault: subjectDefault.trim() || undefined,
@@ -168,7 +171,11 @@ export default function CustomPatternsPage() {
     if (!targetId) return;
 
     try {
-      const res = await fetch(`http://localhost:5001/api/patterns/${targetId}`, { method: 'DELETE' });
+      // 🚀 PRODUCTION UPGRADE: Replaced hardcoded localhost call with environment configuration
+      const res = await apiFetch(`/api/patterns/${targetId}`, { 
+        method: 'DELETE' 
+      });
+      
       if (!res.ok) throw new Error('Server rejected template profile deletion pass.');
 
       setFeedbackState({
@@ -195,7 +202,7 @@ export default function CustomPatternsPage() {
   return (
     <div className="w-full min-h-screen bg-slate-50 py-8 px-6 sm:px-10 lg:px-12 animate-in fade-in duration-300 text-slate-900 space-y-6">
       
-      {/* 🚀 FIXED: Dynamic Header Hub linked directly to current registry array weight */}
+      {/* Dynamic Header Hub linked directly to current registry array weight */}
       <PatternHeader 
         onAppendSection={handleAddSection} 
         patternCount={savedPatterns.length} 

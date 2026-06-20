@@ -15,6 +15,7 @@ import {
   X,
   FolderHeart
 } from 'lucide-react';
+import { apiFetch } from '@/utils/api'; // 🔥 Unified environment wrapper utility linked
 
 interface SectionItem {
   sectionLetter: string;
@@ -61,13 +62,15 @@ export default function UnifiedCreationForm() {
       try {
         setError(null);
         
-        const patternsRes = await fetch('http://localhost:5001/api/patterns');
+        // 🚀 PRODUCTION UPGRADE: Pulled pattern schema metrics over environment client configuration wrapper
+        const patternsRes = await apiFetch('/api/patterns');
         if (patternsRes.ok) {
           const patternsData = await patternsRes.json();
           setPatterns(patternsData);
         }
 
-        const vaultRes = await fetch('http://localhost:5001/api/vault');
+        // 🚀 PRODUCTION UPGRADE: Pulled permanent vault indexes safely
+        const vaultRes = await apiFetch('/api/vault');
         if (vaultRes.ok) {
           const vaultData = await vaultRes.json();
           setVaultDocs(vaultData);
@@ -83,7 +86,8 @@ export default function UnifiedCreationForm() {
   const pollGenerationStatus = async (assignmentId: string) => {
     const interval = setInterval(async () => {
       try {
-        const res = await fetch(`http://localhost:5001/api/assignments/${assignmentId}`);
+        // 🚀 PRODUCTION UPGRADE: Polling background queues through active Render pipeline routers
+        const res = await apiFetch(`/api/assignments/${assignmentId}`);
         const data = await res.json();
 
         if (data.status === 'completed') {
@@ -134,9 +138,11 @@ export default function UnifiedCreationForm() {
         formData.append('primaryFile', store.primaryFile); 
       }
 
-      const response = await fetch('http://localhost:5001/api/assignments', {
+      // 🚀 PRODUCTION UPGRADE: Transmitting complex multi-part stream bundles over secure cloud layout links
+      const response = await apiFetch('/api/assignments', {
         method: 'POST',
-        body: formData
+        body: formData,
+        headers: {} // 💡 Let browser define boundary headers safely
       });
 
       const result = await response.json();
@@ -368,7 +374,6 @@ export default function UnifiedCreationForm() {
           )}
 
           {/* Core submission execution action button block */}
-          {/* 💡 FIXED: Configured button back into your specified primary signature variant colors */}
           <button
             type="submit"
             className="w-full h-11 bg-[#2563EB] hover:bg-blue-700 text-white font-black text-xs uppercase tracking-wider rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm active:scale-[0.98] cursor-pointer"

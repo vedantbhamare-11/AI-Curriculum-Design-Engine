@@ -6,11 +6,12 @@ import Link from 'next/link';
 import { useAssignmentStore } from '@/store/useAssignmentStore';
 import { useRouter } from 'next/navigation';
 import { LibraryHeader } from '@/components/library/LibraryHeader';
-import { LibraryFilters } from '@/components/library/LibraryFilters'; // 💡 Imported Filters
+import { LibraryFilters } from '@/components/library/LibraryFilters'; 
 import { LibraryCard } from '@/components/library/LibraryCard';
 import { FeedbackModal } from '@/components/vault/FeedbackModal';
 import { ConfirmationModal } from '@/components/vault/ConfirmationModal';
 import { Loader2, Inbox } from 'lucide-react';
+import { apiFetch } from '@/utils/api'; // 🔥 Utility wrapper safely linked
 
 interface AssignmentRecord {
   _id: string;
@@ -29,7 +30,7 @@ export default function MyLibraryPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  // 💡 Search & Filter Local Pipeline States
+  // Search & Filter Local Pipeline States
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSubject, setSelectedSubject] = useState('All');
   
@@ -55,11 +56,9 @@ export default function MyLibraryPage() {
       setIsLoading(true);
       setError(null);
 
-      const response = await fetch('http://localhost:5001/api/assignments', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        }
+      // 🚀 PRODUCTION UPGRADE: Swapped out local port string for centralized environment-aware config
+      const response = await apiFetch('/api/assignments', {
+        method: 'GET'
       });
 
       if (!response.ok) {
@@ -125,7 +124,8 @@ export default function MyLibraryPage() {
     try {
       setDeletingIds(prev => ({ ...prev, [targetId]: true }));
 
-      const response = await fetch(`http://localhost:5001/api/assignments/${targetId}`, {
+      // 🚀 PRODUCTION UPGRADE: Swapped target out to relative runtime endpoint mapping blocks
+      const response = await apiFetch(`/api/assignments/${targetId}`, {
         method: 'DELETE',
       });
 
@@ -155,7 +155,7 @@ export default function MyLibraryPage() {
     }
   };
 
-  // 💡 Real-time Evaluation Filtering Engine
+  // Real-time Evaluation Filtering Engine
   const filteredAssessments = assessments.filter(paper => {
     const matchesSearch = 
       paper.subject.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -171,7 +171,7 @@ export default function MyLibraryPage() {
       
       <LibraryHeader paperCount={assessments.length} />
 
-      {/* 💡 Filters Input Component Block */}
+      {/* Filters Input Component Block */}
       <LibraryFilters 
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
@@ -194,7 +194,7 @@ export default function MyLibraryPage() {
             <div className="space-y-1">
               <p className="text-xs font-black text-red-600 uppercase tracking-wider">Connection Interrupted</p>
               <p className="text-xs text-slate-500 font-semibold leading-relaxed">
-                {error}. Verify your backend microservice environment task is actively listening on port 5001.
+                {error}. Verify your backend microservice environment task is actively listening on Render cloud routes.
               </p>
             </div>
             <button 

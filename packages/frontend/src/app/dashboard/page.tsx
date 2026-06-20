@@ -2,11 +2,12 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { DashboardHeader } from '@/components/dashboard/DashboardHeader'; // 💡 Imported Header
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader'; 
 import { DashboardGreeting } from '@/components/dashboard/DashboardGreeting';
 import { DashboardMetrics } from '@/components/dashboard/DashboardMetrics';
 import { RecentAssignments } from '@/components/dashboard/RecentAssignments';
 import { Loader2 } from 'lucide-react';
+import { apiFetch } from '@/utils/api'; // 🔥 Utility wrapper linked successfully
 
 interface Assignment {
   _id: string;
@@ -31,7 +32,9 @@ export default function CoreDashboardPage() {
   async function fetchDashboardData() {
     try {
       setIsLoading(true);
-      const res = await fetch('http://localhost:5001/api/assignments');
+      
+      // 🚀 PRODUCTION UPGRADE: Replaced hardcoded localhost call with environment-aware apiFetch
+      const res = await apiFetch('/api/assignments');
       const data = await res.json();
       
       if (Array.isArray(data)) {
@@ -62,7 +65,7 @@ export default function CoreDashboardPage() {
     <div className="w-full min-h-screen bg-slate-50 py-8 px-6 sm:px-10 lg:px-12 animate-in fade-in duration-300 relative text-slate-900 space-y-6">
       <div className="max-w-6xl mx-auto space-y-6">
         
-        {/* 🚀 Dynamic Header component integrated seamlessly */}
+        {/* Dynamic Header component integrated seamlessly */}
         <DashboardHeader 
           onRefresh={fetchDashboardData} 
           isSyncing={isLoading} 
