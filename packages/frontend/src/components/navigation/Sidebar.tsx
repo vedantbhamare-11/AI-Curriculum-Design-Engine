@@ -97,7 +97,7 @@ export default function Sidebar({
           }`}
         >
           <Settings className="h-5 w-5 text-slate-400" />
-          <span>Settings</span>
+          <span>Settings(Beta)</span>
         </Link>
 
         {/* Divider line */}
