@@ -7,14 +7,21 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://ai-curriculum-design-engine.onrender.com';
 
 export const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
-  // Ensure we strip out any accidental double slash collisions cleanly
   const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
   const targetUrl = `${API_BASE_URL}${cleanEndpoint}`;
+
+  // 💡 PRODUCTION UPGRADE: Detect if the transmission payload body is FormData
+  const isFormData = options.body instanceof FormData;
+
+  // If it's FormData, leave headers blank so the browser handles multi-part boundary assignments natively!
+  const defaultHeaders: Record<string, string> = isFormData 
+    ? {} 
+    : { 'Content-Type': 'application/json' };
 
   const response = await fetch(targetUrl, {
     ...options,
     headers: {
-      'Content-Type': 'application/json',
+      ...defaultHeaders,
       ...options.headers,
     },
   });

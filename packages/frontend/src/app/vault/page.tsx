@@ -9,7 +9,7 @@ import { UploadModal } from '@/components/vault/UploadModal';
 import { FeedbackModal } from '@/components/vault/FeedbackModal';
 import { ConfirmationModal } from '@/components/vault/ConfirmationModal';
 import { X, Sparkles, BookOpen, Loader2, FilePlay, FileText } from 'lucide-react';
-import { apiFetch } from '@/utils/api'; // 🔥 Centralized environment wrapper utility linked
+import { apiFetch } from '@/utils/api'; 
 
 interface VaultDocument {
   _id: string;
@@ -57,7 +57,6 @@ export default function ContextVaultPage() {
   async function loadVaultCatalog() {
     try {
       setIsLoading(true);
-      // 🚀 PRODUCTION UPGRADE: Replaced local port string with adaptive client wrapper
       const res = await apiFetch('/api/vault');
       const data = await res.json();
       if (Array.isArray(data)) setVaultDocs(data);
@@ -78,7 +77,6 @@ export default function ContextVaultPage() {
       if (!baselineMatch) return;
       setActivePreviewDoc(baselineMatch);
 
-      // 🚀 PRODUCTION UPGRADE: Replaced hardcoded localhost reference
       const res = await apiFetch(`/api/vault/${docId}`);
       if (!res.ok) throw new Error('Failed to pull deep material data lines.');
       
@@ -94,7 +92,6 @@ export default function ContextVaultPage() {
       setIsLoadingPdf(true);
       setPdfModalTitle(title);
       
-      // 🚀 PRODUCTION UPGRADE: Routing file stream allocations over clean paths
       const res = await apiFetch(`/api/vault/${docId}`);
       if (!res.ok) throw new Error('Failed to pull file streams.');
       
@@ -143,7 +140,6 @@ export default function ContextVaultPage() {
     if (!targetId) return;
 
     try {
-      // 🚀 PRODUCTION UPGRADE: Abstracted cloud deletion request loop mapping
       const res = await apiFetch(`/api/vault/${targetId}`, { method: 'DELETE' });
       const result = await res.json();
       
@@ -189,11 +185,10 @@ export default function ContextVaultPage() {
       }));
       formData.append('vaultFile', uploadFile); 
 
-      // 🚀 PRODUCTION UPGRADE: Clean multipart pipeline upload via unified config context
+      // 🚀 FIXED: Passed cleanly without double explicit JSON boundary overrides crashing body parsing configurations
       const res = await apiFetch('/api/vault', { 
         method: 'POST', 
-        body: formData,
-        headers: {} // 💡 Let the browser assign its native multi-part form border boundary headers cleanly!
+        body: formData
       });
       if (!res.ok) throw new Error("Backend save failure.");
 

@@ -15,7 +15,7 @@ import {
   X,
   FolderHeart
 } from 'lucide-react';
-import { apiFetch } from '@/utils/api'; // 🔥 Unified environment wrapper utility linked
+import { apiFetch } from '@/utils/api'; 
 
 interface SectionItem {
   sectionLetter: string;
@@ -62,14 +62,12 @@ export default function UnifiedCreationForm() {
       try {
         setError(null);
         
-        // 🚀 PRODUCTION UPGRADE: Pulled pattern schema metrics over environment client configuration wrapper
         const patternsRes = await apiFetch('/api/patterns');
         if (patternsRes.ok) {
           const patternsData = await patternsRes.json();
           setPatterns(patternsData);
         }
 
-        // 🚀 PRODUCTION UPGRADE: Pulled permanent vault indexes safely
         const vaultRes = await apiFetch('/api/vault');
         if (vaultRes.ok) {
           const vaultData = await vaultRes.json();
@@ -86,7 +84,6 @@ export default function UnifiedCreationForm() {
   const pollGenerationStatus = async (assignmentId: string) => {
     const interval = setInterval(async () => {
       try {
-        // 🚀 PRODUCTION UPGRADE: Polling background queues through active Render pipeline routers
         const res = await apiFetch(`/api/assignments/${assignmentId}`);
         const data = await res.json();
 
@@ -138,11 +135,10 @@ export default function UnifiedCreationForm() {
         formData.append('primaryFile', store.primaryFile); 
       }
 
-      // 🚀 PRODUCTION UPGRADE: Transmitting complex multi-part stream bundles over secure cloud layout links
+      // 🚀 FIXED: Sent smoothly through smart wrapper routing parameters
       const response = await apiFetch('/api/assignments', {
         method: 'POST',
-        body: formData,
-        headers: {} // 💡 Let browser define boundary headers safely
+        body: formData
       });
 
       const result = await response.json();
@@ -154,7 +150,7 @@ export default function UnifiedCreationForm() {
         generationStatus: 'processing'
       });
 
-      setLoadingMessage('Gemini Engine is scanning your Context Vault document lines and mapping sections...');
+      setLoadingMessage('Gemini Engine is scanning your Context Vault document lines and mapping sections... (BullMQ processing)');
       pollGenerationStatus(result.assignmentId);
 
     } catch (err: any) {
@@ -187,11 +183,7 @@ export default function UnifiedCreationForm() {
 
   return (
     <form onSubmit={handleTriggerGeneration} className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-      
-      {/* Left Panel Parameters Columns Deck */}
       <div className="lg:col-span-2 space-y-6">
-        
-        {/* Core Administrative Properties Setup Box */}
         <div className="bg-white border border-slate-200 p-5 sm:p-6 rounded-2xl shadow-sm space-y-5">
           <div>
             <h3 className="text-xs font-black text-slate-800 uppercase tracking-wider">Scope Parameters</h3>
@@ -248,14 +240,12 @@ export default function UnifiedCreationForm() {
           </div>
         </div>
 
-        {/* Dynamic Dual-Context Data Ingest Dropzones Container */}
         <div className="bg-white border border-slate-200 p-5 sm:p-6 rounded-2xl shadow-sm space-y-6">
           <div>
             <h3 className="text-xs font-black text-slate-800 uppercase tracking-wider">Contextual Grounding Strategy</h3>
             <p className="text-xs text-slate-400 font-bold mt-0.5">Control the information source grounding priorities layer parameters.</p>
           </div>
 
-          {/* 1st Priority Context File Element Block */}
           <div className="space-y-2">
             <label className="text-[11px] font-black text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
               <UploadCloud className="h-4 w-4 text-slate-400" /> 1st Priority Immediate Context (Lecture Notes / Whiteboard Upload)
@@ -287,7 +277,6 @@ export default function UnifiedCreationForm() {
             )}
           </div>
 
-          {/* 2nd Priority Context Permanent Vault Connector Selector Dropdown */}
           <div className="space-y-1.5 border-t border-slate-100 pt-5">
             <label className="text-[11px] font-black text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
               <FolderHeart className="h-4 w-4 text-slate-400" /> 2nd Priority Cross-Reference Book Link (Loaded from Reference Context Vault)
@@ -304,7 +293,6 @@ export default function UnifiedCreationForm() {
             </select>
           </div>
 
-          {/* Custom prompts field block instructions parameters focus text areas */}
           <div className="space-y-1.5 border-t border-slate-100 pt-5">
             <label className="text-[11px] font-black text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
               <ListChecks className="h-4 w-4 text-slate-400" /> Specific Guidance Directives Prompts
@@ -318,17 +306,13 @@ export default function UnifiedCreationForm() {
             />
           </div>
         </div>
-
       </div>
 
-      {/* Right Sidebar Blueprint Selection Card Sticky Panel */}
       <div className="space-y-6 lg:sticky lg:top-6">
-        
-        {/* Pattern Binder Core Profile Custom Selector */}
         <div className="bg-white border border-slate-200 p-5 sm:p-6 rounded-2xl shadow-sm space-y-4">
           <div>
             <h3 className="text-xs font-black text-slate-800 uppercase tracking-wider">Exam Blueprint Template</h3>
-            <p className="text-xs text-slate-400 font-bold mt-0.5">Enforce custom school structural point weight pattern configurations profiles rules.</p>
+            <p className="text-xs text-slate-400 font-bold mt-0.5">Enforce custom school structural weight configurations rules.</p>
           </div>
 
           <div className="space-y-1.5">
@@ -349,7 +333,6 @@ export default function UnifiedCreationForm() {
             </select>
           </div>
 
-          {/* Dynamic Sections Table Distribution Overview Summary Strip */}
           {selectedPattern && (
             <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3 shadow-inner">
               <div className="flex justify-between items-center text-[10px] font-black text-slate-400 uppercase tracking-wider border-b border-slate-200 pb-2">
@@ -373,7 +356,6 @@ export default function UnifiedCreationForm() {
             </div>
           )}
 
-          {/* Core submission execution action button block */}
           <button
             type="submit"
             className="w-full h-11 bg-[#2563EB] hover:bg-blue-700 text-white font-black text-xs uppercase tracking-wider rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm active:scale-[0.98] cursor-pointer"
@@ -381,7 +363,6 @@ export default function UnifiedCreationForm() {
             <Sparkles className="h-4 w-4 stroke-[2.2]" /> Run Assessment Engine
           </button>
         </div>
-
       </div>
     </form>
   );
