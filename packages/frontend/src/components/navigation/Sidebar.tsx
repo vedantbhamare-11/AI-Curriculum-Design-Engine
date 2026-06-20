@@ -15,17 +15,26 @@ import {
   Settings,
 } from "lucide-react";
 
+// 💡 FIXED TYPE INTERFACE: Added explicit string parameters matching layout.tsx invocations
 interface SidebarProps {
   avatarUrl?: string;
+  schoolName?: string;
+  location?: string;
 }
 
 export default function Sidebar({
   avatarUrl = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80",
+  schoolName: explicitSchoolName,
+  location: explicitLocation,
 }: SidebarProps) {
   const pathname = usePathname();
   
-  // Hydrate preferences instantly from local Zustand slice parameters
-  const { teacherName, schoolName, departmentName } = useSettingsStore();
+  // Hydrate base configuration structures instantly from global Zustand state storage
+  const storeSettings = useSettingsStore();
+
+  // Resolve whether to use the explicit layout injection variables or fall back to store fields
+  const activeSchoolName = explicitSchoolName || storeSettings.schoolName || "Delhi Public School";
+  const activeLocationSub = explicitLocation || storeSettings.departmentName || "General Faculty";
 
   const navItems = [
     { label: "Home", href: "/dashboard", icon: LayoutDashboard },
@@ -39,7 +48,6 @@ export default function Sidebar({
       <div className="space-y-6">
         {/* Brand Identity Logo Row */}
         <div className="flex items-center gap-3 px-2 py-1.5">
-          {/* 💡 FIXED: Updated from indigo-600 into explicit professional high-contrast dark theme style */}
           <div className="h-9 w-9 bg-slate-900 rounded-xl flex items-center justify-center text-white shadow-sm">
             <GraduationCap className="h-5 w-5" />
           </div>
@@ -48,8 +56,7 @@ export default function Sidebar({
           </span>
         </div>
 
-        {/* Create Assignment Button */}
-        {/* 💡 FIXED: Converted to use your strict primary blueprint color variant parameter */}
+        {/* Create Assignment Button Wrapper */}
         <Link
           href="/create"
           className="w-full h-12 bg-[#2563EB] hover:bg-blue-700 text-white font-bold text-sm rounded-2xl flex items-center justify-center gap-2 transition-all shadow-sm active:scale-[0.98] border border-blue-600 cursor-pointer"
@@ -100,27 +107,27 @@ export default function Sidebar({
           <span>Settings(Beta)</span>
         </Link>
 
-        {/* Divider line */}
+        {/* Divider Separation Line */}
         <div className="h-px bg-slate-100 mx-2" />
 
         {/* School Profile Context Block */}
         <div className="flex items-center gap-3 p-3 bg-slate-50 border border-slate-200 rounded-2xl shadow-inner">
           <img
             src={avatarUrl}
-            alt={teacherName}
+            alt={storeSettings.teacherName || "Lead Educator"}
             className="h-10 w-10 rounded-xl object-cover border border-slate-200 shrink-0 shadow-sm"
           />
           <div className="flex-1 min-w-0">
-            {/* Lead Teacher Name Anchor */}
+            {/* Lead Educator Name Anchor */}
             <h4 className="text-xs font-black text-slate-900 truncate tracking-wide">
-              {teacherName || "Lead Educator"}
+              {storeSettings.teacherName || "Lead Educator"}
             </h4>
-            {/* Hierarchical Campus Node Sub-labels */}
+            {/* Hierarchical Campus Node Labels */}
             <p className="text-[10px] font-bold text-slate-500 truncate tracking-wide mt-0.5">
-              {schoolName || "Institutional Branch"}
+              {activeSchoolName}
             </p>
             <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider truncate mt-0.5">
-              {departmentName || "General Faculty"}
+              {activeLocationSub}
             </p>
           </div>
         </div>
