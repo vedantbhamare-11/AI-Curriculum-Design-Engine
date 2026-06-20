@@ -26,7 +26,9 @@ export default function AssessmentViewer() {
           <button
             onClick={() => setActiveTab('paper')}
             className={`flex items-center gap-2 px-4 h-9 rounded-lg text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
-              activeTab === 'paper' ? 'bg-white border border-slate-200 text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800'
+              activeTab === 'paper' 
+                ? 'bg-white border border-slate-200 text-slate-900 shadow-sm' 
+                : 'text-slate-500 hover:text-slate-800'
             }`}
           >
             <Eye className="h-4 w-4" /> Question Paper
@@ -34,7 +36,9 @@ export default function AssessmentViewer() {
           <button
             onClick={() => setActiveTab('answers')}
             className={`flex items-center gap-2 px-4 h-9 rounded-lg text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
-              activeTab === 'answers' ? 'bg-white border border-slate-200 text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800'
+              activeTab === 'answers' 
+                ? 'bg-white border border-slate-200 text-slate-900 shadow-sm' 
+                : 'text-slate-500 hover:text-slate-800'
             }`}
           >
             <Key className="h-4 w-4" /> Answer Key
@@ -51,7 +55,7 @@ export default function AssessmentViewer() {
           </button>
           <button
             onClick={handlePrint}
-            className="flex items-center gap-2 px-5 h-9 bg-slate-900 hover:bg-slate-800 text-white border border-slate-800 rounded-xl text-xs font-black uppercase tracking-wider transition-all active:scale-95 cursor-pointer shadow-sm"
+            className="flex items-center gap-2 px-5 h-9 bg-[#2563EB] hover:bg-blue-700 text-white border border-blue-600 rounded-xl text-xs font-black uppercase tracking-wider transition-all active:scale-95 cursor-pointer shadow-sm"
           >
             <Printer className="h-4 w-4" /> Print PDF
           </button>
@@ -96,36 +100,51 @@ export default function AssessmentViewer() {
 
                 {/* Questions Block Wrapper */}
                 <div className="space-y-6 pl-1">
-                  {section.questions.map((q: any, qIdx: number) => {
-                    const targetQuestionText = q.text || q.questionText || q.question_text || q.question || "Sample Evaluation Question Statement Block";
-                    
-                    return (
-                      <div key={qIdx} className="space-y-2 print:break-inside-avoid-page">
-                        <div className="flex justify-between items-start gap-6">
-                          <p className="text-base leading-relaxed text-slate-900 print:text-black flex-1 font-medium">
-                            <span className="font-bold mr-1.5">{qIdx + 1}.</span> {targetQuestionText}
-                          </p>
-                          <span className="text-xs font-black text-slate-400 whitespace-nowrap print:text-black font-sans uppercase tracking-wide pt-0.5">
-                            ({q.marks} Marks)
-                          </span>
-                        </div>
+                  {(() => {
+                    // 💡 SAFE STORAGE ARRAY FALLBACK PIPELINE
+                    const activeQuestions = section.questions || [];
 
-                        {/* Render MCQ Options options cleanly inline if present */}
-                        {q.options && q.options.length > 0 && (
-                          <div className="grid grid-cols-2 gap-x-8 gap-y-2.5 pl-6 pt-1.5">
-                            {q.options.map((option: string, oIdx: number) => (
-                              <div key={oIdx} className="flex items-center gap-3 text-sm font-medium text-slate-800 print:text-black">
-                                <span className="h-5 w-5 rounded-lg border border-slate-200 font-sans flex items-center justify-center text-[10px] font-black shrink-0 bg-slate-50 shadow-inner">
-                                  {String.fromCharCode(65 + oIdx)}
-                                </span>
-                                <span>{option}</span>
-                              </div>
-                            ))}
+                    if (activeQuestions.length === 0) {
+                      return (
+                        <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl text-center">
+                          <p className="text-xs font-bold text-slate-400 italic font-sans">
+                            No questions generated for this section. Ensure your context grounding file contains readable text parameters.
+                          </p>
+                        </div>
+                      );
+                    }
+
+                    return activeQuestions.map((q: any, qIdx: number) => {
+                      const targetQuestionText = q.text || q.questionText || q.question_text || q.question || "Untitled Question Statement Block";
+                      
+                      return (
+                        <div key={qIdx} className="space-y-2 print:break-inside-avoid-page">
+                          <div className="flex justify-between items-start gap-6">
+                            <p className="text-base leading-relaxed text-slate-900 print:text-black flex-1 font-medium">
+                              <span className="font-bold mr-1.5">{qIdx + 1}.</span> {targetQuestionText}
+                            </p>
+                            <span className="text-xs font-black text-slate-400 whitespace-nowrap print:text-black font-sans uppercase tracking-wide pt-0.5">
+                              ({q.marks || q.marksPerQuestion || section.marksPerQuestion || 0} Marks)
+                            </span>
                           </div>
-                        )}
-                      </div>
-                    );
-                  })}
+
+                          {/* Render MCQ Options cleanly inline if present */}
+                          {q.options && q.options.length > 0 && (
+                            <div className="grid grid-cols-2 gap-x-8 gap-y-2.5 pl-6 pt-1.5">
+                              {q.options.map((option: string, oIdx: number) => (
+                                <div key={oIdx} className="flex items-center gap-3 text-sm font-medium text-slate-800 print:text-black">
+                                  <span className="h-5 w-5 rounded-lg border border-slate-200 font-sans flex items-center justify-center text-[10px] font-black shrink-0 bg-slate-50 shadow-inner">
+                                    {String.fromCharCode(65 + oIdx)}
+                                  </span>
+                                  <span>{option}</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    });
+                  })()}
                 </div>
               </div>
             ))}
@@ -140,16 +159,30 @@ export default function AssessmentViewer() {
             </div>
 
             <div className="space-y-4">
-              {paper.answerKey.map((ans: any, aIdx: number) => (
-                <div key={aIdx} className="p-4 bg-slate-50 border border-slate-200 rounded-xl print:bg-transparent print:border-none print:p-0 print:break-inside-avoid-page">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-black text-xs text-slate-900 uppercase tracking-wider">Question {ans.questionNumber || (aIdx + 1)}:</span>
+              {(() => {
+                const activeAnswerKey = paper.answerKey || [];
+
+                if (activeAnswerKey.length === 0) {
+                  return (
+                    <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl text-center">
+                      <p className="text-xs font-bold text-slate-400 italic">
+                        No answers mapped for this assessment sheet template configuration.
+                      </p>
+                    </div>
+                  );
+                }
+
+                return activeAnswerKey.map((ans: any, aIdx: number) => (
+                  <div key={aIdx} className="p-4 bg-slate-50 border border-slate-200 rounded-xl print:bg-transparent print:border-none print:p-0 print:break-inside-avoid-page">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-black text-xs text-slate-900 uppercase tracking-wider">Question {ans.questionNumber || (aIdx + 1)}:</span>
+                    </div>
+                    <p className="text-slate-600 text-sm font-semibold leading-relaxed pl-0.5">
+                      {ans.answerText || ans.answer || "No verified solution criteria written."}
+                    </p>
                   </div>
-                  <p className="text-slate-600 text-sm font-semibold leading-relaxed pl-0.5">
-                    {ans.answerText || ans.answer || "No verified solution criteria written."}
-                  </p>
-                </div>
-              ))}
+                ));
+              })()}
             </div>
           </div>
         )}

@@ -20,7 +20,7 @@ export default function CreateAssignmentPage() {
 
   return (
     <div className="w-full min-h-screen bg-slate-50 py-8 px-6 sm:px-10 lg:px-12 print:hidden text-slate-900 space-y-6">
-      <div className="max-w-5xl mx-auto space-y-6">
+      <div className="space-y-6">
         
         {/* Banner Title Dashboard Container */}
         <div className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
