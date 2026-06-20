@@ -6,7 +6,7 @@ import { GeneralSettings } from '@/components/settings/GeneralSettings';
 import { AiSettings } from '@/components/settings/AiSettings';
 import { NetworkSettings } from '@/components/settings/NetworkSettings';
 import { FeedbackModal } from '@/components/vault/FeedbackModal';
-import { Settings, Sliders, Cpu, Globe } from 'lucide-react';
+import { Settings, Sliders, Globe } from 'lucide-react';
 
 type TabId = 'general' | 'ai' | 'network';
 
@@ -25,30 +25,33 @@ export default function AppSettingsPage() {
   };
 
   return (
-    <div className="w-full min-h-screen bg-slate-50 py-8 px-6 sm:px-10 lg:px-12 animate-in fade-in duration-300 relative">
+    <div className="w-full min-h-screen bg-slate-50 py-8 px-6 sm:px-10 lg:px-12 animate-in fade-in duration-300 relative text-slate-900 space-y-6">
       <div className="max-w-4xl mx-auto space-y-6">
         
         {/* Upper Dashboard Header Title */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <h1 className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2.5 sm:text-2xl">
-              <Settings className="h-6 w-6 text-indigo-600" /> Control Preferences Matrix
+        <div className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+          <div className="space-y-1.5">
+            <h1 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+              <span className="p-2 bg-slate-50 border border-slate-200 rounded-xl shadow-sm text-slate-800">
+                <Settings className="h-5 w-5 stroke-[2.5]" />
+              </span> 
+              Control Preferences Matrix
             </h1>
-            <p className="text-sm text-slate-600 font-semibold">
-              Calibrate system weights, institutional labels, and model baseline thresholds.
+            <p className="text-sm text-slate-500 font-bold max-w-xl">
+              Calibrate system weights, institutional labels, and model baseline thresholds parameters.
             </p>
           </div>
 
           <button 
             onClick={handleCommitSave}
-            className="h-11 px-6 bg-slate-900 hover:bg-slate-800 text-white font-black text-xs uppercase tracking-wider rounded-xl transition-all active:scale-95 shadow-sm"
+            className="h-11 px-5 bg-[#2563EB] hover:bg-blue-700 text-white font-black text-xs uppercase tracking-wider rounded-xl transition-all active:scale-95 shadow-sm cursor-pointer shrink-0 self-start sm:self-auto"
           >
             Save All Settings
           </button>
         </div>
 
         {/* Tab Selection Row Menu */}
-        <div className="flex border-b border-slate-200 overflow-x-auto scrollbar-none gap-2">
+        <div className="flex border-b border-slate-200 overflow-x-auto scrollbar-none gap-1.5">
           {tabItems.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -56,13 +59,13 @@ export default function AppSettingsPage() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`h-11 px-4 text-xs font-black uppercase tracking-wider flex items-center gap-2 border-b-2 transition-all ${
+                className={`h-10 px-4 text-xs font-black uppercase tracking-wider flex items-center gap-2 border-b-2 transition-all whitespace-nowrap cursor-pointer ${
                   isActive 
-                    ? 'border-indigo-600 text-indigo-600 bg-white/40' 
-                    : 'border-transparent text-slate-500 hover:text-slate-900'
+                    ? 'border-slate-900 text-slate-900 bg-white/50 font-black' 
+                    : 'border-transparent text-slate-400 hover:text-slate-800'
                 }`}
               >
-                <Icon className="h-4 w-4" />
+                <Icon className="h-3.5 w-3.5 stroke-[2.2]" />
                 {tab.label}
               </button>
             );
@@ -78,13 +81,12 @@ export default function AppSettingsPage() {
 
       </div>
 
-      {/* Reusable Success Confirmation System Popout */}
       <FeedbackModal 
         isOpen={isSuccessModalOpen}
         onClose={() => setIsSuccessModalOpen(false)}
         type="success"
         title="Preferences Synchronized"
-        message="Your customized core layout configurations have been successfully committed to local browser persistent storage buffers."
+        message="Your customized core layout configurations have been successfully committed to browser local configuration buffers."
       />
 
     </div>

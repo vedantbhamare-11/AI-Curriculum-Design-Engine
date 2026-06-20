@@ -10,31 +10,31 @@ export function NetworkSettings() {
 
   return (
     <div className="space-y-5 animate-in fade-in duration-200">
-      <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-5">
+      <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-sm space-y-5">
         
-        <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2 flex items-start gap-3">
-          <Info className="h-5 w-5 text-indigo-600 shrink-0 mt-0.5" />
-          <div className="space-y-1">
+        <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2 flex items-start gap-3 shadow-inner">
+          <Info className="h-4 w-4 text-slate-600 shrink-0 mt-0.5" />
+          <div className="space-y-0.5">
             <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">Client-Side Runtime Persistence</h4>
             <p className="text-xs text-slate-500 font-semibold leading-relaxed">
-              All system parameters are managed inside separate local storage threads. Saved profile variables automatically bundle right into your prompt templates upon generation runs without making server network round trips.
+              All system variables are managed securely inside separate local browser storage layers. Saved profile boundaries automatically bundle into creation wizards without making expensive server network round trips.
             </p>
           </div>
         </div>
 
-        <div className="pt-2 border-t border-slate-100 flex justify-between items-center">
+        <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
           <div className="space-y-0.5">
-            <h4 className="text-xs font-black text-slate-900">System Reset Matrix</h4>
-            <p className="text-[11px] text-slate-400 font-medium">Clear active local storage records and revert back to institutional defaults.</p>
+            <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">System Reset Matrix</h4>
+            <p className="text-xs text-slate-400 font-semibold">Clear active workspace records and revert back to institutional defaults.</p>
           </div>
           <button
             type="button"
             onClick={() => {
-              if (window.confirm("Revert all workspace controls back to configurations defaults?")) {
+              if (window.confirm("Revert all workspace controls back to default configuration specifications?")) {
                 resetSettings();
               }
             }}
-            className="h-9 px-4 border border-rose-200 text-rose-600 hover:bg-rose-50 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all active:scale-95 shadow-sm"
+            className="h-10 px-4 border border-red-200 text-red-600 hover:bg-red-50 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-95 shadow-sm cursor-pointer whitespace-nowrap self-start sm:self-auto"
           >
             <RefreshCw className="h-3.5 w-3.5 stroke-[2.2]" /> Reset Preferences
           </button>
