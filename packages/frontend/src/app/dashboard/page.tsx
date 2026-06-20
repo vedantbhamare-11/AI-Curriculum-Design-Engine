@@ -2,10 +2,11 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader'; // 💡 Imported Header
 import { DashboardGreeting } from '@/components/dashboard/DashboardGreeting';
 import { DashboardMetrics } from '@/components/dashboard/DashboardMetrics';
 import { RecentAssignments } from '@/components/dashboard/RecentAssignments';
-import { Loader2, RefreshCw } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 interface Assignment {
   _id: string;
@@ -58,34 +59,19 @@ export default function CoreDashboardPage() {
   }, []);
 
   return (
-    <div className="w-full min-h-screen bg-slate-50 py-8 px-6 sm:px-10 lg:px-12 animate-in fade-in duration-300 relative text-slate-900">
+    <div className="w-full min-h-screen bg-slate-50 py-8 px-6 sm:px-10 lg:px-12 animate-in fade-in duration-300 relative text-slate-900 space-y-6">
       <div className="max-w-6xl mx-auto space-y-6">
         
-        {/* Upper Title Section Row */}
-        <div className="flex items-center justify-between border-b border-slate-200 pb-5">
-          <div>
-            <h1 className="text-xl font-black text-slate-900 tracking-tight sm:text-2xl">
-              Teacher Workspace Studio
-            </h1>
-            <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mt-0.5">
-              Platform Overview & Analytical Telemetry Control Panel
-            </p>
-          </div>
+        {/* 🚀 Dynamic Header component integrated seamlessly */}
+        <DashboardHeader 
+          onRefresh={fetchDashboardData} 
+          isSyncing={isLoading} 
+        />
 
-          <button
-            onClick={fetchDashboardData}
-            disabled={isLoading}
-            className="h-10 w-10 bg-white border border-slate-200 hover:border-blue-600 hover:text-blue-600 text-slate-700 rounded-xl flex items-center justify-center shadow-sm transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
-            title="Refresh Server Metrics Feed"
-          >
-            <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin text-blue-600' : 'text-slate-600'}`} />
-          </button>
-        </div>
-
-        {/* 1. Welcoming Hero Banner Accent */}
+        {/* Welcoming Hero Banner Accent */}
         <DashboardGreeting />
 
-        {/* 2. Analytical Metrics Counter Layout Block */}
+        {/* Analytical Metrics Counter Layout Block */}
         {isLoading && assignments.length === 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {[...Array(4)].map((_, i) => (
@@ -96,10 +82,10 @@ export default function CoreDashboardPage() {
           <DashboardMetrics stats={stats} />
         )}
 
-        {/* 3. Core Status Table Tracking Grid */}
+        {/* Core Status Table Tracking Grid */}
         {isLoading && assignments.length === 0 ? (
           <div className="bg-white border border-slate-200 p-24 text-center rounded-2xl shadow-sm flex flex-col items-center justify-center gap-2">
-            <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+            <Loader2 className="h-6 w-6 animate-spin text-slate-900" />
             <p className="text-xs font-bold text-slate-400">Syncing live server generation pipelines...</p>
           </div>
         ) : (
