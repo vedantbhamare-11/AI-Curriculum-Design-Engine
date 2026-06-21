@@ -3,8 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { PatternHeader } from '@/components/patterns/PatternHeader';
-import { PatternCatalogList } from '@/components/patterns/PatternCatalogList';
+import PatternHeader from '@/components/patterns/PatternHeader';import { PatternCatalogList } from '@/components/patterns/PatternCatalogList';
 import { PatternInspectionModal } from '@/components/patterns/PatternInspectionModal';
 import { FeedbackModal } from '@/components/vault/FeedbackModal';
 import { ConfirmationModal } from '@/components/vault/ConfirmationModal';
@@ -14,7 +13,7 @@ import {
   Sparkles, 
   Loader2
 } from 'lucide-react';
-import { apiFetch } from '@/utils/api'; // 🔥 Centralized environment wrapper utility
+import { apiFetch } from '@/utils/api';
 
 interface SectionInput {
   sectionLetter: string;
@@ -67,7 +66,6 @@ export default function CustomPatternsPage() {
 
   async function fetchPatternsCatalog() {
     try {
-      // 🚀 PRODUCTION UPGRADE: Swapped raw local endpoint layout for relative workspace paths
       const res = await apiFetch('/api/patterns');
       const data = await res.json();
       if (Array.isArray(data)) setSavedPatterns(data);
@@ -125,8 +123,6 @@ export default function CustomPatternsPage() {
 
     try {
       setIsSubmitting(true);
-      
-      // 🚀 PRODUCTION UPGRADE: Dynamic cloud injection schema routing rules pass
       const response = await apiFetch('/api/patterns', {
         method: 'POST',
         body: JSON.stringify({
@@ -171,11 +167,7 @@ export default function CustomPatternsPage() {
     if (!targetId) return;
 
     try {
-      // 🚀 PRODUCTION UPGRADE: Replaced hardcoded localhost call with environment configuration
-      const res = await apiFetch(`/api/patterns/${targetId}`, { 
-        method: 'DELETE' 
-      });
-      
+      const res = await apiFetch(`/api/patterns/${targetId}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Server rejected template profile deletion pass.');
 
       setFeedbackState({
@@ -200,21 +192,21 @@ export default function CustomPatternsPage() {
   const totalMarks = sections.reduce((sum, sec) => sum + ((Number(sec.questionCount) || 0) * (Number(sec.marksPerQuestion) || 0)), 0);
 
   return (
-    <div className="w-full min-h-screen bg-slate-50 py-8 px-6 sm:px-10 lg:px-12 animate-in fade-in duration-300 text-slate-900 space-y-6">
+    /* 📱 RESPONSIVE SPACE BASELINE: Dropped default margins down to px-4 on compact mobile screens */
+    <div className="w-full min-h-screen bg-slate-50 py-4 px-4 sm:py-8 sm:px-10 lg:px-12 animate-in fade-in duration-300 text-slate-900 space-y-4 sm:space-y-6">
       
-      {/* Dynamic Header Hub linked directly to current registry array weight */}
       <PatternHeader 
         onAppendSection={handleAddSection} 
         patternCount={savedPatterns.length} 
       />
 
-      <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         
         {/* Left Side 2 Columns: Construction Workspace Form */}
-        <form onSubmit={handleSavePattern} className="lg:col-span-2 space-y-6">
+        <form onSubmit={handleSavePattern} className="lg:col-span-2 space-y-4 sm:space-y-6">
           
           {/* Core Configuration Meta Block */}
-          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-sm grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="text-[11px] font-black text-slate-400 uppercase tracking-wider">Pattern Template Name</label>
               <input
@@ -227,7 +219,7 @@ export default function CustomPatternsPage() {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[11px] font-black text-slate-400 uppercase tracking-wider">Default Subject Binding <span className="text-slate-400 font-medium lowercase">(optional)</span></label>
+              <label className="text-[11px] font-black text-slate-400 uppercase tracking-wider">Default Subject Binding</label>
               <input
                 type="text"
                 placeholder="e.g., Physics, Mathematics"
@@ -238,18 +230,18 @@ export default function CustomPatternsPage() {
             </div>
           </div>
 
-          {/* Aggregation Data Strip */}
-          <div className="bg-white border border-slate-200 px-5 py-4 rounded-2xl shadow-sm flex items-center justify-between text-xs font-bold text-slate-400 uppercase tracking-wider">
-            <div className="flex gap-6">
+          {/* 📱 FLEX-DIRECTION FLUID STRIP: Shifts metadata counters and submit buttons vertically on small screens */}
+          <div className="bg-white border border-slate-200 p-4 sm:px-5 sm:py-4 rounded-2xl shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs font-bold text-slate-400 uppercase tracking-wider">
+            <div className="flex justify-between sm:justify-start gap-6 border-b sm:border-b-0 border-slate-100 pb-3 sm:pb-0">
               <div>Sections: <span className="text-slate-900 font-black">{sections.length}</span></div>
               <div>Total Questions: <span className="text-slate-900 font-black">{totalQuestions}</span></div>
             </div>
-            <div className="flex items-center gap-3">
-              <div>Evaluation Total Weight: <span className="text-slate-900 font-black text-sm tracking-normal normal-case">{totalMarks} Marks</span></div>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="text-left sm:text-right">Evaluation Total: <span className="text-slate-900 font-black text-sm tracking-normal normal-case">{totalMarks} Marks</span></div>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="h-9 px-4 bg-[#2563EB] hover:bg-blue-700 text-white font-bold text-xs uppercase tracking-wider rounded-xl flex items-center gap-2 shadow-sm transition-all cursor-pointer"
+                className="w-full sm:w-auto h-10 px-5 bg-[#2563EB] hover:bg-blue-700 text-white font-bold text-xs uppercase tracking-wider rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
               >
                 {isSubmitting ? <Loader2 className="h-3.5 w-3.5 animate-spin text-white" /> : <>Save Blueprint</>}
               </button>
@@ -261,7 +253,7 @@ export default function CustomPatternsPage() {
             {sections.map((section, index) => (
               <div 
                 key={section.sectionLetter}
-                className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4 relative group"
+                className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-sm space-y-4"
               >
                 <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
                   <span className="h-6 px-3 bg-slate-50 border border-slate-200 text-slate-800 font-black text-[10px] tracking-wider uppercase rounded-md flex items-center justify-center">
@@ -278,8 +270,9 @@ export default function CustomPatternsPage() {
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="space-y-1.5">
+                {/* Question Input Configurations Stack Wrapper */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="space-y-1.5 sm:col-span-1">
                     <label className="text-[11px] font-black text-slate-400 uppercase tracking-wider">Question Category Type</label>
                     <input
                       type="text" required
