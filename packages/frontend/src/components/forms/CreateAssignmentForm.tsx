@@ -11,7 +11,6 @@ import {
   ListChecks, 
   Sparkles, 
   Loader2, 
-  FileText, 
   X,
   FolderHeart
 } from 'lucide-react';
@@ -61,13 +60,11 @@ export default function UnifiedCreationForm() {
     async function fetchFormDependencies() {
       try {
         setError(null);
-        
         const patternsRes = await apiFetch('/api/patterns');
         if (patternsRes.ok) {
           const patternsData = await patternsRes.json();
           setPatterns(patternsData);
         }
-
         const vaultRes = await apiFetch('/api/vault');
         if (vaultRes.ok) {
           const vaultData = await vaultRes.json();
@@ -86,7 +83,6 @@ export default function UnifiedCreationForm() {
       try {
         const res = await apiFetch(`/api/assignments/${assignmentId}`);
         const data = await res.json();
-
         if (data.status === 'completed') {
           clearInterval(interval);
           store.updateFormFields({ 
@@ -107,19 +103,16 @@ export default function UnifiedCreationForm() {
 
   const handleTriggerGeneration = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!subject || !className || !dueDate || !localPatternId) {
       setError('Missing parameters. Ensure a valid subject, class target, due date, and blueprint pattern profile are provided.');
       return;
     }
-
     try {
       setError(null);
       store.updateFormFields({ generationStatus: 'pending' });
       setLoadingMessage('Uploading context files and initiating background creation tasks...');
 
       const formData = new FormData();
-      
       const payloadMetadata = {
         subject,
         className,
@@ -130,17 +123,14 @@ export default function UnifiedCreationForm() {
       };
       
       formData.append('data', JSON.stringify(payloadMetadata));
-
       if (store.primaryFile) {
         formData.append('primaryFile', store.primaryFile); 
       }
 
-      // 🚀 FIXED: Sent smoothly through smart wrapper routing parameters
       const response = await apiFetch('/api/assignments', {
         method: 'POST',
         body: formData
       });
-
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || 'Server rejected creation request bundle.');
 
@@ -149,10 +139,8 @@ export default function UnifiedCreationForm() {
         jobId: result.jobId,
         generationStatus: 'processing'
       });
-
       setLoadingMessage('Gemini Engine is scanning your Context Vault document lines and mapping sections... (BullMQ processing)');
       pollGenerationStatus(result.assignmentId);
-
     } catch (err: any) {
       console.error(err);
       store.updateFormFields({ generationStatus: 'failed' });
@@ -171,7 +159,7 @@ export default function UnifiedCreationForm() {
 
   if (store.generationStatus === 'pending' || store.generationStatus === 'processing') {
     return (
-      <div className="bg-white border border-slate-200 p-12 rounded-2xl text-center space-y-4 shadow-sm flex flex-col items-center justify-center min-h-[450px]">
+      <div className="bg-white border border-slate-200 p-6 sm:p-12 rounded-2xl text-center space-y-4 shadow-sm flex flex-col items-center justify-center min-h-87.5">
         <Loader2 className="h-8 w-8 text-slate-900 animate-spin" />
         <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider">Assembling Your Assessment</h3>
         <p className="text-xs font-bold text-slate-500 max-w-md mx-auto bg-slate-50 px-4 py-3 rounded-xl border border-slate-200">
@@ -182,9 +170,9 @@ export default function UnifiedCreationForm() {
   }
 
   return (
-    <form onSubmit={handleTriggerGeneration} className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-      <div className="lg:col-span-2 space-y-6">
-        <div className="bg-white border border-slate-200 p-5 sm:p-6 rounded-2xl shadow-sm space-y-5">
+    <form onSubmit={handleTriggerGeneration} className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:grid-6 items-start">
+      <div className="lg:col-span-2 space-y-4 sm:space-y-6">
+        <div className="bg-white border border-slate-200 p-4 sm:p-6 rounded-2xl shadow-sm space-y-4 sm:space-y-5">
           <div>
             <h3 className="text-xs font-black text-slate-800 uppercase tracking-wider">Scope Parameters</h3>
             <p className="text-xs text-slate-400 font-bold mt-0.5">Define student group segments, subjects, and parameters boundaries.</p>
@@ -196,6 +184,7 @@ export default function UnifiedCreationForm() {
             </div>
           )}
 
+          {/* 📱 RESPONSIVE SCOPE WRAPPERS: Changed to simple stacks on mobile viewports */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="text-[11px] font-black text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
@@ -240,7 +229,7 @@ export default function UnifiedCreationForm() {
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200 p-5 sm:p-6 rounded-2xl shadow-sm space-y-6">
+        <div className="bg-white border border-slate-200 p-4 sm:p-6 rounded-2xl shadow-sm space-y-5 sm:space-y-6">
           <div>
             <h3 className="text-xs font-black text-slate-800 uppercase tracking-wider">Contextual Grounding Strategy</h3>
             <p className="text-xs text-slate-400 font-bold mt-0.5">Control the information source grounding priorities layer parameters.</p>
@@ -248,52 +237,52 @@ export default function UnifiedCreationForm() {
 
           <div className="space-y-2">
             <label className="text-[11px] font-black text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-              <UploadCloud className="h-4 w-4 text-slate-400" /> 1st Priority Immediate Context (Lecture Notes / Whiteboard Upload)
+              <UploadCloud className="h-4 w-4 text-slate-400" /> 1st Priority Context (Lecture Snapshot)
             </label>
             
             {!store.primaryFile ? (
               <div 
                 onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-slate-200 hover:border-slate-300 bg-slate-50/50 rounded-xl p-6 text-center cursor-pointer transition-all space-y-1 group"
+                className="border-2 border-dashed border-slate-200 hover:border-slate-300 bg-slate-50/50 rounded-xl p-4 sm:p-6 text-center cursor-pointer transition-all space-y-1 group"
               >
                 <UploadCloud className="h-6 w-6 text-slate-400 group-hover:text-slate-600 mx-auto transition-colors stroke-[2.2]" />
-                <p className="text-xs font-black text-slate-700">Attach temporary handwritten text lesson file snapshot</p>
+                <p className="text-xs font-black text-slate-700">Attach temporary notes lesson file snapshot</p>
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">PDF, TXT or Markdown up to 10MB</p>
                 <input type="file" ref={fileInputRef} onChange={handleFileChange} accept=".pdf,.txt,.md" className="hidden" />
               </div>
             ) : (
-              <div className="flex items-center justify-between p-3.5 bg-slate-50 border border-slate-200 rounded-xl">
-                <div className="flex items-center gap-3">
-                  <div className="h-8 w-12 bg-slate-900 text-white flex items-center justify-center rounded-lg font-black text-[10px] uppercase tracking-wider">Source</div>
+              <div className="flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-xl">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                  <div className="h-7 w-10 bg-slate-900 text-white flex items-center justify-center rounded-lg font-black text-[9px] uppercase tracking-wider shrink-0">Source</div>
                   <div className="min-w-0">
-                    <p className="text-xs font-black text-slate-800 truncate max-w-[200px] sm:max-w-xs">{store.primaryFile.name}</p>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wide">{(store.primaryFile.size / (1024 * 1024)).toFixed(2)} MB • Anchor Grounding</p>
+                    <p className="text-xs font-black text-slate-800 truncate max-w-30 xs:max-w-[180px] sm:max-w-xs">{store.primaryFile.name}</p>
+                    <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wide">{(store.primaryFile.size / (1024 * 1024)).toFixed(2)} MB</p>
                   </div>
                 </div>
-                <button type="button" onClick={() => store.setPrimaryFile(null)} className="p-1 border border-slate-200 hover:text-red-600 bg-white rounded-lg transition-all cursor-pointer">
+                <button type="button" onClick={() => store.setPrimaryFile(null)} className="p-1 border border-slate-200 hover:text-red-600 bg-white rounded-lg transition-all cursor-pointer shrink-0">
                   <X className="h-4 w-4 stroke-[2.5]" />
                 </button>
               </div>
             )}
           </div>
 
-          <div className="space-y-1.5 border-t border-slate-100 pt-5">
+          <div className="space-y-1.5 border-t border-slate-100 pt-4 sm:pt-5">
             <label className="text-[11px] font-black text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-              <FolderHeart className="h-4 w-4 text-slate-400" /> 2nd Priority Cross-Reference Book Link (Loaded from Reference Context Vault)
+              <FolderHeart className="h-4 w-4 text-slate-400" /> 2nd Priority Vault Reference Link (Optional)
             </label>
             <select
               value={localVaultId}
               onChange={(e) => setLocalVaultId(e.target.value)}
               className="w-full h-11 px-3.5 border border-slate-200 bg-white text-slate-900 text-xs font-black rounded-xl focus:outline-none focus:border-slate-400 cursor-pointer"
             >
-              <option value="">-- Choose Background Reference Book Material (Optional) --</option>
+              <option value="">-- Choose Background Reference Book Material --</option>
               {vaultDocs.map(doc => (
                 <option key={doc._id} value={doc._id}>{doc.title} [{doc.subject}]</option>
               ))}
             </select>
           </div>
 
-          <div className="space-y-1.5 border-t border-slate-100 pt-5">
+          <div className="space-y-1.5 border-t border-slate-100 pt-4 sm:pt-5">
             <label className="text-[11px] font-black text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
               <ListChecks className="h-4 w-4 text-slate-400" /> Specific Guidance Directives Prompts
             </label>
@@ -308,8 +297,9 @@ export default function UnifiedCreationForm() {
         </div>
       </div>
 
-      <div className="space-y-6 lg:sticky lg:top-6">
-        <div className="bg-white border border-slate-200 p-5 sm:p-6 rounded-2xl shadow-sm space-y-4">
+      {/* 📱 DESKTOP STICKY SIDEBAR / MOBILE LOWER PANEL */}
+      <div className="space-y-4 sm:space-y-6 lg:sticky lg:top-6">
+        <div className="bg-white border border-slate-200 p-4 sm:p-6 rounded-2xl shadow-sm space-y-4">
           <div>
             <h3 className="text-xs font-black text-slate-800 uppercase tracking-wider">Exam Blueprint Template</h3>
             <p className="text-xs text-slate-400 font-bold mt-0.5">Enforce custom school structural weight configurations rules.</p>
