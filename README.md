@@ -6,17 +6,16 @@ Designed with a fully asynchronous, event-driven architecture, the system levera
 
 ---
 
-# 📖 Table of Contents
+## 📖 Table of Contents
 
-1. [System Architectural Design](https://chatgpt.com/c/6a379b6b-01e4-83e8-a4b2-03cbbdb98a15#-system-architectural-design)
-2. [Key Core Features](https://chatgpt.com/c/6a379b6b-01e4-83e8-a4b2-03cbbdb98a15#-key-core-features)
-3. [Repository Structure](https://chatgpt.com/c/6a379b6b-01e4-83e8-a4b2-03cbbdb98a15#-repository-structure)
-4. [Prerequisites &amp; System Dependencies](https://chatgpt.com/c/6a379b6b-01e4-83e8-a4b2-03cbbdb98a15#-prerequisites--system-dependencies)
-5. [Local Environment Setup](https://chatgpt.com/c/6a379b6b-01e4-83e8-a4b2-03cbbdb98a15#-local-environment-setup)
-6. [Running the Project Locally](https://chatgpt.com/c/6a379b6b-01e4-83e8-a4b2-03cbbdb98a15#-running-the-project-locally)
-7. [Production Deployment Strategy](https://chatgpt.com/c/6a379b6b-01e4-83e8-a4b2-03cbbdb98a15#-production-deployment-strategy)
-8. [Technology Stack](https://chatgpt.com/c/6a379b6b-01e4-83e8-a4b2-03cbbdb98a15#-technology-stack)
-9. [System Workflow](https://chatgpt.com/c/6a379b6b-01e4-83e8-a4b2-03cbbdb98a15#-system-workflow)
+1. [System Architectural Design](#-system-architectural-design)
+2. [Key Core Features](#-key-core-features)
+3. [Deep-Dive Repository Directory Explanation](#-deep-dive-repository-directory-explanation)
+4. [Prerequisites & System Dependencies](#-prerequisites--system-dependencies)
+5. [Local Environment Setup](#-local-environment-setup)
+6. [Running the Project Locally](#-running-the-project-locally)
+7. [Production Deployment Strategy](#-production-deployment-strategy)
+8. [The Tech Stack Grid](#%EF%B8%8F-the-tech-stack-grid)
 
 ---
 
