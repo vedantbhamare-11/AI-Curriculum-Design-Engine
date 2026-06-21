@@ -7,7 +7,7 @@ import { DashboardGreeting } from '@/components/dashboard/DashboardGreeting';
 import { DashboardMetrics } from '@/components/dashboard/DashboardMetrics';
 import { RecentAssignments } from '@/components/dashboard/RecentAssignments';
 import { Loader2 } from 'lucide-react';
-import { apiFetch } from '@/utils/api'; // 🔥 Utility wrapper linked successfully
+import { apiFetch } from '@/utils/api';
 
 interface Assignment {
   _id: string;
@@ -32,8 +32,6 @@ export default function CoreDashboardPage() {
   async function fetchDashboardData() {
     try {
       setIsLoading(true);
-      
-      // 🚀 PRODUCTION UPGRADE: Replaced hardcoded localhost call with environment-aware apiFetch
       const res = await apiFetch('/api/assignments');
       const data = await res.json();
       
@@ -62,21 +60,20 @@ export default function CoreDashboardPage() {
   }, []);
 
   return (
-    <div className="w-full min-h-screen bg-slate-50 py-8 px-6 sm:px-10 lg:px-12 animate-in fade-in duration-300 relative text-slate-900 space-y-6">
-      <div className="max-w-6xl mx-auto space-y-6">
+    /* 📱 FLUID PADDING ADAPTATION: Dropped default desktop spacing down to py-4 px-4 for tighter layout alignment */
+    <div className="w-full min-h-screen bg-slate-50 py-4 px-4 sm:py-8 sm:px-10 lg:px-12 animate-in fade-in duration-300 relative text-slate-900 space-y-4 sm:space-y-6">
+      <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6">
         
-        {/* Dynamic Header component integrated seamlessly */}
         <DashboardHeader 
           onRefresh={fetchDashboardData} 
           isSyncing={isLoading} 
         />
 
-        {/* Welcoming Hero Banner Accent */}
         <DashboardGreeting />
 
-        {/* Analytical Metrics Counter Layout Block */}
+        {/* Analytical Metrics Loader Cards Layout Block */}
         {isLoading && assignments.length === 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
             {[...Array(4)].map((_, i) => (
               <div key={i} className="h-24 bg-white border border-slate-200/60 rounded-2xl animate-pulse" />
             ))}
@@ -87,7 +84,7 @@ export default function CoreDashboardPage() {
 
         {/* Core Status Table Tracking Grid */}
         {isLoading && assignments.length === 0 ? (
-          <div className="bg-white border border-slate-200 p-24 text-center rounded-2xl shadow-sm flex flex-col items-center justify-center gap-2">
+          <div className="bg-white border border-slate-200 p-12 sm:p-24 text-center rounded-2xl shadow-sm flex flex-col items-center justify-center gap-2">
             <Loader2 className="h-6 w-6 animate-spin text-slate-900" />
             <p className="text-xs font-bold text-slate-400">Syncing live server generation pipelines...</p>
           </div>
