@@ -37,12 +37,13 @@ export function UploadModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="absolute inset-0" onClick={onClose} />
-      <form onSubmit={onSubmit} className="bg-white border border-slate-200 w-full max-w-xl rounded-2xl shadow-2xl p-6 relative z-10 space-y-5 animate-in zoom-in-95 duration-200">
+      {/* 📱 MAX HEIGHT SAFELOCK OVERLAY: Enables natural internal container scrolling on small devices */}
+      <form onSubmit={onSubmit} className="bg-white border border-slate-200 w-full max-w-xl max-h-[94vh] overflow-y-auto rounded-2xl shadow-2xl p-4 sm:p-6 relative z-10 space-y-4 sm:space-y-5 scrollbar-none">
         
-        <div className="flex items-center justify-between border-b border-slate-100 pb-3.5">
-          <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider flex items-center gap-2.5">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+          <h3 className="text-xs sm:text-sm font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
             <span className="p-1.5 bg-slate-50 rounded-xl border border-slate-200 text-slate-700">
               <UploadCloud className="h-4 w-4 stroke-[2.5]" />
             </span>
@@ -54,6 +55,7 @@ export function UploadModal({
         </div>
 
         <div className="space-y-4">
+          {/* 📱 METADATA GRID COALESCING: Forms break cleanly down into single inputs on smartphones */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="sm:col-span-2 space-y-1.5">
               <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Book / Document Title</label>
@@ -75,7 +77,7 @@ export function UploadModal({
           <div className="space-y-1.5">
             <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Binary Document Stream Attachment</label>
             {!file ? (
-              <div onClick={() => fileInputRef.current?.click()} className="border border-dashed border-slate-300 hover:border-slate-400 bg-slate-50/50 rounded-xl p-8 text-center cursor-pointer transition-all space-y-1 group">
+              <div onClick={() => fileInputRef.current?.click()} className="border border-dashed border-slate-300 hover:border-slate-400 bg-slate-50/50 rounded-xl p-6 sm:p-8 text-center cursor-pointer transition-all space-y-1 group">
                 <UploadCloud className="h-6 w-6 text-slate-400 group-hover:text-slate-600 mx-auto transition-colors stroke-[2.2]" />
                 <p className="text-xs font-black text-slate-700">Select textbook or manual document path</p>
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">PDF, TXT or Markdown up to 50MB</p>
@@ -83,22 +85,23 @@ export function UploadModal({
               </div>
             ) : (
               <div className="flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-xl">
-                <div className="flex items-center gap-3">
-                  <div className="h-8 w-12 bg-slate-900 text-white flex items-center justify-center rounded-lg font-black text-[10px] uppercase tracking-wider">Asset</div>
-                  <div className="min-w-0">
-                    <p className="text-xs font-black text-slate-800 truncate max-w-[280px]">{file.name}</p>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wide">{(file.size / (1024 * 1024)).toFixed(2)} MB • Content Source ready</p>
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                  <div className="h-8 w-12 bg-slate-900 text-white flex items-center justify-center rounded-lg font-black text-[9px] uppercase tracking-wider shrink-0">Asset</div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-black text-slate-800 truncate">{file.name}</p>
+                    <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wide">{(file.size / (1024 * 1024)).toFixed(2)} MB • Source Ready</p>
                   </div>
                 </div>
-                <button type="button" onClick={() => setFile(null)} className="p-1 border border-slate-200 text-slate-400 hover:text-red-600 bg-white rounded-lg transition-colors cursor-pointer"><X className="h-4 w-4" /></button>
+                <button type="button" onClick={() => setFile(null)} className="p-1 border border-slate-200 text-slate-400 hover:text-red-600 bg-white rounded-lg transition-colors cursor-pointer shrink-0 ml-2"><X className="h-4 w-4" /></button>
               </div>
             )}
           </div>
         </div>
 
-        <div className="pt-3.5 border-t border-slate-100 flex justify-end gap-2 text-xs font-bold uppercase tracking-wider">
-          <button type="button" onClick={onClose} className="h-11 px-5 border border-slate-200 hover:bg-slate-50 rounded-xl text-slate-500 transition-colors cursor-pointer">Cancel</button>
-          <button type="submit" disabled={isSubmitting} className="h-11 px-5 bg-[#2563EB] hover:bg-blue-700 text-white rounded-xl flex items-center justify-center gap-2 min-w-[160px] shadow-sm transition-all">{isSubmitting ? <Loader2 className="h-4 w-4 animate-spin text-white" /> : 'Confirm Archive'}</button>
+        {/* 📱 FOOTER ACTION STACKING: Forces full width actions links buttons on thin viewport view tracks */}
+        <div className="pt-3.5 border-t border-slate-100 flex flex-col sm:flex-row justify-end gap-2 text-xs font-bold uppercase tracking-wider shrink-0">
+          <button type="button" onClick={onClose} className="w-full sm:w-auto h-11 px-5 border border-slate-200 hover:bg-slate-50 rounded-xl text-slate-500 transition-colors cursor-pointer orden-2 sm:order-1">Cancel</button>
+          <button type="submit" disabled={isSubmitting} className="w-full sm:w-auto h-11 px-5 bg-[#2563EB] hover:bg-blue-700 text-white rounded-xl flex items-center justify-center gap-2 min-w-40 shadow-sm transition-all order-1 sm:order-2">{isSubmitting ? <Loader2 className="h-4 w-4 animate-spin text-white" /> : 'Confirm Archive'}</button>
         </div>
       </form>
     </div>
