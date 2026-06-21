@@ -11,7 +11,7 @@ import { LibraryCard } from '@/components/library/LibraryCard';
 import { FeedbackModal } from '@/components/vault/FeedbackModal';
 import { ConfirmationModal } from '@/components/vault/ConfirmationModal';
 import { Loader2, Inbox } from 'lucide-react';
-import { apiFetch } from '@/utils/api'; // 🔥 Utility wrapper safely linked
+import { apiFetch } from '@/utils/api';
 
 interface AssignmentRecord {
   _id: string;
@@ -30,7 +30,6 @@ export default function MyLibraryPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  // Search & Filter Local Pipeline States
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSubject, setSelectedSubject] = useState('All');
   
@@ -42,12 +41,7 @@ export default function MyLibraryPage() {
     type: 'success' | 'error';
     title: string;
     message: string;
-  }>({
-    isOpen: false,
-    type: 'success',
-    title: '',
-    message: ''
-  });
+  }>({ isOpen: false, type: 'success', title: '', message: '' });
 
   const router = useRouter();
 
@@ -55,16 +49,11 @@ export default function MyLibraryPage() {
     try {
       setIsLoading(true);
       setError(null);
-
-      // 🚀 PRODUCTION UPGRADE: Swapped out local port string for centralized environment-aware config
-      const response = await apiFetch('/api/assignments', {
-        method: 'GET'
-      });
+      const response = await apiFetch('/api/assignments', { method: 'GET' });
 
       if (!response.ok) {
         throw new Error(`Server responded with non-200 status code: ${response.status}`);
       }
-
       const rawText = await response.text();
       
       let data;
@@ -84,7 +73,6 @@ export default function MyLibraryPage() {
         Array.isArray(item.sections) && 
         item.sections.length > 0
       );
-
       setAssessments(completedPapers);
     } catch (err: any) {
       console.error("🛑 Library exception detailed logs:", err);
@@ -110,7 +98,6 @@ export default function MyLibraryPage() {
         answerKey: paper.answerKey || []
       }
     });
-    
     router.push('/create');
   };
 
@@ -123,16 +110,11 @@ export default function MyLibraryPage() {
 
     try {
       setDeletingIds(prev => ({ ...prev, [targetId]: true }));
-
-      // 🚀 PRODUCTION UPGRADE: Swapped target out to relative runtime endpoint mapping blocks
-      const response = await apiFetch(`/api/assignments/${targetId}`, {
-        method: 'DELETE',
-      });
+      const response = await apiFetch(`/api/assignments/${targetId}`, { method: 'DELETE' });
 
       if (!response.ok) {
         throw new Error('Backend failed to complete the database deletion request.');
       }
-
       setAssessments(prev => prev.filter(item => item._id !== targetId));
 
       setFeedbackState({
@@ -155,23 +137,20 @@ export default function MyLibraryPage() {
     }
   };
 
-  // Real-time Evaluation Filtering Engine
   const filteredAssessments = assessments.filter(paper => {
     const matchesSearch = 
       paper.subject.toLowerCase().includes(searchQuery.toLowerCase()) || 
       paper.className.toLowerCase().includes(searchQuery.toLowerCase());
-    
     const matchesSubject = selectedSubject === 'All' || paper.subject.toLowerCase() === selectedSubject.toLowerCase();
-    
     return matchesSearch && matchesSubject;
   });
 
   return (
-    <div className="w-full min-h-screen bg-slate-50 py-8 px-6 sm:px-10 lg:px-12 relative animate-in fade-in duration-300 text-slate-900 space-y-6">
+    /* 📱 MOBILE INSTULATION PADDING: Lowered root gutters down to py-4 px-4 dynamically on thin smartphones */
+    <div className="w-full min-h-screen bg-slate-50 py-4 px-4 sm:py-8 sm:px-10 lg:px-12 relative animate-in fade-in duration-300 text-slate-900 space-y-4 sm:space-y-6">
       
       <LibraryHeader paperCount={assessments.length} />
 
-      {/* Filters Input Component Block */}
       <LibraryFilters 
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
@@ -182,15 +161,15 @@ export default function MyLibraryPage() {
       <div>
         {/* ⏳ LOADING STATE VIEW */}
         {isLoading && (
-          <div className="bg-white border border-slate-200 rounded-2xl p-16 text-center shadow-sm flex flex-col items-center justify-center gap-2">
+          <div className="bg-white border border-slate-200 rounded-2xl p-8 sm:p-16 text-center shadow-sm flex flex-col items-center justify-center gap-2 min-h-62.5">
             <Loader2 className="h-6 w-6 text-slate-900 animate-spin" />
             <p className="text-xs font-bold text-slate-400">Querying your database archive collections history...</p>
           </div>
         )}
 
-        {/* ❌ ERRONEOUS SYSTEM INTERCEPTOR */}
+        {/* ❌ ERROR INTERCEPTOR */}
         {error && !isLoading && (
-          <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center max-w-xl mx-auto space-y-4 shadow-sm">
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 text-center max-w-xl mx-auto space-y-4 shadow-sm">
             <div className="space-y-1">
               <p className="text-xs font-black text-red-600 uppercase tracking-wider">Connection Interrupted</p>
               <p className="text-xs text-slate-500 font-semibold leading-relaxed">
@@ -199,7 +178,7 @@ export default function MyLibraryPage() {
             </div>
             <button 
               onClick={fetchLibrary} 
-              className="h-9 px-4 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-sm transition-all cursor-pointer"
+              className="w-full sm:w-auto h-9 px-4 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-sm transition-all cursor-pointer"
             >
               Retry Sync
             </button>
@@ -208,7 +187,7 @@ export default function MyLibraryPage() {
 
         {/* 📭 EMPTY STATE / SEARCH EXCLUSIONS VIEW */}
         {!isLoading && !error && filteredAssessments.length === 0 && (
-          <div className="bg-white border border-slate-200 rounded-2xl p-16 text-center shadow-sm flex flex-col items-center justify-center max-w-md mx-auto space-y-5">
+          <div className="bg-white border border-slate-200 rounded-2xl p-8 sm:p-16 text-center shadow-sm flex flex-col items-center justify-center max-w-md mx-auto space-y-5">
             <div className="p-3 bg-slate-50 text-slate-400 rounded-xl border border-slate-200 shadow-sm">
               <Inbox className="h-5 w-5 stroke-[2.2]" />
             </div>
@@ -221,7 +200,7 @@ export default function MyLibraryPage() {
             {assessments.length === 0 && (
               <Link
                 href="/create"
-                className="h-10 px-5 bg-[#2563EB] hover:bg-blue-700 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-sm flex items-center justify-center transition-all active:scale-95"
+                className="w-full h-10 px-5 bg-[#2563EB] hover:bg-blue-700 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-sm flex items-center justify-center transition-all active:scale-95"
               >
                 Generate First Paper
               </Link>
@@ -229,9 +208,9 @@ export default function MyLibraryPage() {
           </div>
         )}
 
-        {/* 📊 DYNAMIC FILTERED CARDS GRID */}
+        {/* 📊 DYNAMIC CARDS GRID */}
         {!isLoading && !error && filteredAssessments.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
             {filteredAssessments.map((paper) => (
               <LibraryCard 
                 key={paper._id}
