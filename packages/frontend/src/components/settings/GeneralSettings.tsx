@@ -17,15 +17,15 @@ export function GeneralSettings() {
   } = useSettingsStore();
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-200">
+    <div className="space-y-4 sm:space-y-6 animate-in fade-in duration-200">
       
       {/* 🏫 SECTION A: ORGANIZATIONAL METRICS */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-sm space-y-5">
+      <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-sm space-y-4 sm:space-y-5">
         <div>
           <h3 className="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-2">
             <School className="h-4 w-4 stroke-[2.5]" /> 1. Institutional Node Hierarchy
           </h3>
-          <p className="text-[11px] text-slate-400 font-bold mt-0.5 uppercase tracking-wide">Configure identity headers for generated layouts.</p>
+          <p className="text-[10px] sm:text-[11px] text-slate-400 font-bold mt-0.5 uppercase tracking-wide">Configure identity headers for generated layouts.</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -62,6 +62,7 @@ export function GeneralSettings() {
           </div>
         </div>
 
+        {/* 📱 COALESCING INPUT ROW MARGINS: Stacks beautifully below md grid scales */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="md:col-span-2 space-y-1.5">
             <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider">
@@ -98,12 +99,12 @@ export function GeneralSettings() {
       </div>
 
       {/* 📝 SECTION B: COMPASS SCHEMA BOILERPLATES */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-sm space-y-4">
+      <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-sm space-y-4">
         <div>
           <h3 className="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-2">
             <ScrollText className="h-4 w-4 stroke-[2.5]" /> 2. Assessment Blueprint Defaults
           </h3>
-          <p className="text-[11px] text-slate-400 font-bold mt-0.5 uppercase tracking-wide">Pre-set instructions injected straight into system generators.</p>
+          <p className="text-[10px] sm:text-[11px] text-slate-400 font-bold mt-0.5 uppercase tracking-wide">Pre-set instructions injected straight into system generators.</p>
         </div>
 
         <div className="space-y-1.5">

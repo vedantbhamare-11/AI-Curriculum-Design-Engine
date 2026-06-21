@@ -9,10 +9,10 @@ export function NetworkSettings() {
   const { resetSettings } = useSettingsStore();
 
   return (
-    <div className="space-y-5 animate-in fade-in duration-200">
-      <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-sm space-y-5">
+    <div className="space-y-4 sm:space-y-5 animate-in fade-in duration-200">
+      <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-sm space-y-4 sm:space-y-5">
         
-        <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2 flex items-start gap-3 shadow-inner">
+        <div className="p-3 sm:p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2 flex items-start gap-3 shadow-inner">
           <Info className="h-4 w-4 text-slate-600 shrink-0 mt-0.5" />
           <div className="space-y-0.5">
             <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">Client-Side Runtime Persistence</h4>
@@ -22,6 +22,7 @@ export function NetworkSettings() {
           </div>
         </div>
 
+        {/* 📱 ADAPTIVE SYSTEM RESET FOOTER: Shifts instantly from row to flex-col block elements on mobile phones */}
         <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
           <div className="space-y-0.5">
             <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">System Reset Matrix</h4>
@@ -34,7 +35,7 @@ export function NetworkSettings() {
                 resetSettings();
               }
             }}
-            className="h-10 px-4 border border-red-200 text-red-600 hover:bg-red-50 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-95 shadow-sm cursor-pointer whitespace-nowrap self-start sm:self-auto"
+            className="w-full sm:w-auto h-10 px-4 border border-red-200 text-red-600 hover:bg-red-50 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-95 shadow-sm cursor-pointer whitespace-nowrap"
           >
             <RefreshCw className="h-3.5 w-3.5 stroke-[2.2]" /> Reset Preferences
           </button>

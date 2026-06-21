@@ -9,8 +9,8 @@ export function AiSettings() {
   const { selectedModel, temperature, maxTokens, updateSettings } = useSettingsStore();
 
   return (
-    <div className="space-y-5 animate-in fade-in duration-200">
-      <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-sm space-y-5">
+    <div className="space-y-4 sm:space-y-5 animate-in fade-in duration-200">
+      <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-sm space-y-4 sm:space-y-5">
         
         <div className="space-y-1.5">
           <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
@@ -26,12 +26,13 @@ export function AiSettings() {
           </select>
         </div>
 
-        <div className="space-y-3 bg-slate-50 border border-slate-200 p-4 rounded-xl shadow-inner">
-          <div className="flex justify-between items-center">
+        {/* 📱 ADAPTIVE METRIC LABELS: Realigned text positions perfectly for narrow columns */}
+        <div className="space-y-3 bg-slate-50 border border-slate-200 p-3 sm:p-4 rounded-xl shadow-inner">
+          <div className="flex flex-col gap-1 sm:flex-row sm:justify-between sm:items-center">
             <label className="text-[10px] font-black text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-              <Gauge className="h-4 w-4 text-slate-400" /> Temperature Metric: <span className="text-slate-900 font-black font-mono bg-white border border-slate-200 px-2 py-0.5 rounded text-xs">{temperature}</span>
+              <Gauge className="h-4 w-4 text-slate-400" /> Temperature Metric: <span className="text-slate-900 font-black font-mono bg-white border border-slate-200 px-2 py-0.5 rounded text-xs ml-1">{temperature}</span>
             </label>
-            <span className="text-[9px] text-slate-400 font-black uppercase tracking-wider bg-white border border-slate-200/60 px-1.5 py-0.5 rounded">
+            <span className="text-[9px] text-slate-400 font-black uppercase tracking-wider bg-white border border-slate-200/60 px-1.5 py-0.5 rounded self-start sm:self-auto">
               {temperature <= 0.3 ? 'Deterministic' : 'Creative'}
             </span>
           </div>
