@@ -7,6 +7,7 @@ import patternRoutes from './routes/pattern.routes.js';
 import vaultRoutes from './routes/vault.routes.js';
 import { initAssessmentWorker } from './workers/assessment.worker.js'; // 💡 Fixed spelling block match!
 dotenv.config();
+import { initVaultWorker } from './workers/vaultWorker.js'; // ➕ Add this line
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -32,3 +33,6 @@ app.get('/health', (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 Production engine humming along at: http://localhost:${PORT}`);
 });
+
+initAssessmentWorker();
+initVaultWorker(); // 🚀 Start listening to the vault queue!

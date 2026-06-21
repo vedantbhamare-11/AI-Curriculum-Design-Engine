@@ -1,9 +1,9 @@
+// packages/backend/src/routes/vault.ts
 import { Router } from 'express';
 import multer from 'multer';
-import zlib from 'zlib';
-// @ts-ignore
-import pdfParser from 'pdf-parse-fork'; 
+import { Queue } from 'bullmq';
 import { VaultMaterial } from '../models/VaultMaterial.js';
+import { connection } from '../config/queue.js';
 
 const router = Router();
 const upload = multer({ 
@@ -11,10 +11,13 @@ const upload = multer({
   limits: { fileSize: 50 * 1024 * 1024 } 
 });
 
-// ➕ POST /api/vault - Intercepts textbooks/syllabi and converts text/PDF files
+// Initialize our background Vault Queue handler linking Upstash Redis
+const vaultQueue = new Queue('vaultIngestion', { connection: connection as any });
+
+// ➕ POST /api/vault - Accepts files instantly and shifts parsing to background queue arrays
 router.post('/', upload.single('vaultFile'), async (req, res) => {
   try {
-    console.log("📥 Archiving reference asset into Vault...");
+    console.log("📥 Receiving live multipart frame allocation pass inside Vault endpoint...");
     
     let bodyData = req.body;
     if (typeof req.body.data === 'string') {
@@ -31,59 +34,55 @@ router.post('/', upload.single('vaultFile'), async (req, res) => {
       return res.status(400).json({ error: 'Missing title, description, or subject fields.' });
     }
 
-    const bytes = req.file?.size || 0;
+    if (!req.file) {
+      return res.status(400).json({ error: 'Missing active textbook/syllabus source payload file asset.' });
+    }
+
+    const bytes = req.file.size;
     const fileSizeText = bytes > 1024 * 1024 
       ? `${(bytes / (1024 * 1024)).toFixed(2)} MB` 
       : `${(bytes / 1024).toFixed(0)} KB`;
 
-    let extractedPayloadText = '';
-
-    if (req.file) {
-      const mime = req.file.mimetype;
-      console.log(`📋 Processing live stream for format: ${mime}`);
-
-      if (mime === 'application/pdf') {
-        let parseFn: any = pdfParser;
-        if (pdfParser && (pdfParser as any).default) {
-          parseFn = (pdfParser as any).default;
-        }
-
-        const parsedPdfData = await parseFn(req.file.buffer);
-        extractedPayloadText = parsedPdfData.text || '';
-      } else if (mime === 'text/plain' || mime === 'text/markdown' || mime === 'application/json') {
-        extractedPayloadText = req.file.buffer.toString('utf8');
-      } else {
-        extractedPayloadText = `Document Reference Profile: ${title.trim()}\nSummary Constraints: ${description.trim()}`;
-      }
-    }
-
-    if (extractedPayloadText.length > 40000) {
-      extractedPayloadText = extractedPayloadText.substring(0, 40000) + "\n\n...[Truncated to safeguard minute token quota tiers]";
-    }
-
-    let safeCompressedBuffer: Buffer | undefined = undefined;
-    if (req.file?.buffer) {
-      console.log(`🗜️ Compressing raw ${fileSizeText} binary allocation buffer...`);
-      safeCompressedBuffer = zlib.gzipSync(req.file.buffer);
-    }
-
-    const newMaterial = new VaultMaterial({
+    // 1. Create a placeholder document instantly inside MongoDB Atlas with a pending string status frame
+    const placeholderMaterial = new VaultMaterial({
       title: title.trim(),
       description: description.trim(),
       subject,
-      fileMimeType: req.file?.mimetype || 'application/pdf',
+      fileMimeType: req.file.mimetype,
       fileSizeText,
-      extractedText: extractedPayloadText,
-      fileBuffer: safeCompressedBuffer
+      extractedText: "🔍 Processing asynchronous document line indexing workflows in cloud background queues...",
+      fileBuffer: undefined // Filled securely by background worker thread array after compilation loops wrap
     });
 
-    await newMaterial.save();
-    console.log(`✅ Rich content parsed and stored under ID: ${newMaterial._id}`);
+    await placeholderMaterial.save();
+    console.log(`📝 Placeholder row initialized. Offloading heavy file parse tasks onto BullMQ layer...`);
+
+    // Convert memory buffer allocations into transportable base64 strings
+    const fileBufferBase64 = req.file.buffer.toString('base64');
     
-    return res.status(201).json(newMaterial);
+    // 2. 🚀 RESILIENT QUEUE CONFIGURATION: Offload file parameters straight onto Upstash Redis cluster queues
+    await vaultQueue.add('extractText', {
+      materialId: placeholderMaterial._id,
+      fileBufferBase64,
+      originalMimeType: req.file.mimetype,
+      title: title.trim(),
+      description: description.trim()
+    }, {
+      attempts: 3,                 // 🔄 If Render crashes mid-job due to RAM limits, automatically retry up to 3 times
+      backoff: {
+        type: 'fixed',
+        delay: 15000               // ⏱️ Wait 15 seconds before trying again to let the container clear its memory footprint
+      },
+      removeOnComplete: true,      // Clean up background cache keys on job success
+      removeOnFail: false          // Keep failed logs visible inside your logging cluster for inspection
+    });
+
+    // 3. Immediately return status 202 (Accepted) to the browser! Takes less than 200ms—CORS network block avoided.
+    return res.status(202).json(placeholderMaterial);
+
   } catch (error: any) {
-    console.error('❌ Failed to extract file details:', error);
-    return res.status(500).json({ error: error.message || 'Failed to process document streams.' });
+    console.error('❌ Failed to route ingestion parameters:', error);
+    return res.status(500).json({ error: error.message || 'Failed to initialize ingestion pipeline processing parameters.' });
   }
 });
 
@@ -108,7 +107,9 @@ router.get('/:id', async (req, res) => {
     const responsePayload: any = material.toObject();
     if (material.fileBuffer) {
       try {
-        const unzippedBuffer = zlib.gunzipSync(material.fileBuffer);
+        // Dynamic conditional runtime extraction preventing bundle compilation crashes
+        const zlibModule = await import('zlib');
+        const unzippedBuffer = zlibModule.default.gunzipSync(material.fileBuffer);
         responsePayload.fileBufferBase64 = unzippedBuffer.toString('base64');
       } catch (zipErr) {
         responsePayload.fileBufferBase64 = material.fileBuffer.toString('base64');
